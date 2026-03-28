@@ -21,7 +21,7 @@
   --shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
   --body-top-glow: rgba(246, 248, 250, 0.08);
   --body-gradient-start: #3b434a;
-  --topbar-bg: #24292d;
+  --topbar-bg: #2f353a;
   --menu-trigger-bg: rgba(59, 67, 74, 0.36);
   --menu-trigger-open-bg: rgba(77, 84, 91, 0.45);
   --menu-panel-bg: rgba(36, 41, 45, 0.98);
@@ -145,8 +145,9 @@ a {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 1.2rem;
+  gap: 6px;
+  font-size: 1.42rem;
+  line-height: 1.08;
   font-weight: 700;
   letter-spacing: -0.02em;
   text-decoration: none;

@@ -1371,6 +1371,7 @@
     const ogLocaleMeta = document.getElementById("og-locale");
     const twitterTitleMeta = document.getElementById("twitter-title");
     const twitterDescriptionMeta = document.getElementById("twitter-description");
+    const themeColorMeta = document.getElementById("theme-color-meta");
     const platformLongFormOption = platformLimit.querySelector('option[value="500"]');
     const platformCustomOption = platformLimit.querySelector('option[value="custom"]');
     const languageEnglishOption = languageSelect.querySelector('option[value="en"]');
@@ -1383,9 +1384,9 @@
     function loadThemePreference() {
       try {
         const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-        return storedTheme === "dark" ? "dark" : "light";
+        return storedTheme === "light" ? "light" : "dark";
       } catch (error) {
-        return "light";
+        return "dark";
       }
     }
 
@@ -1424,6 +1425,10 @@
     function applyTheme(theme) {
       const safeTheme = theme === "light" ? "light" : "dark";
       document.documentElement.dataset.theme = safeTheme;
+
+      if (themeColorMeta) {
+        themeColorMeta.setAttribute("content", safeTheme === "light" ? "#f6f8fa" : "#2f353a");
+      }
 
       if (themeToggle) {
         themeToggle.checked = safeTheme === "light";
