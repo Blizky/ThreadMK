@@ -3,11 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ThreadMK · Free Thread Splitter for X (Twitter) and Bluesky</title>
+    <title>ThreadMK · Free editor and thread splitter for X (Twitter) and Bluesky</title>
     <meta
       id="meta-description"
       name="description"
-      content="Split long text into clean X / Twitter and Bluesky posts in your browser. Free and no account needed. Preserve line breaks, add hashtags, number posts, and correct English or Spanish."
+      content="Write posts, save drafts and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish."
     />
     <meta
       name="robots"
@@ -21,24 +21,24 @@
     <meta
       id="og-title"
       property="og:title"
-      content="ThreadMK · Free Thread Splitter for X (Twitter) and Bluesky"
+      content="ThreadMK · Free editor and thread splitter for X (Twitter) and Bluesky"
     />
     <meta
       id="og-description"
       property="og:description"
-      content="Split long text into clean X / Twitter and Bluesky posts in your browser. Free and no account needed. Preserve line breaks, add hashtags, number posts, and correct English or Spanish."
+      content="Write posts, save drafts and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish."
     />
     <meta id="og-locale" property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary" />
     <meta
       id="twitter-title"
       name="twitter:title"
-      content="ThreadMK · Free Thread Splitter for X (Twitter) and Bluesky"
+      content="ThreadMK · Free editor and thread splitter for X (Twitter) and Bluesky"
     />
     <meta
       id="twitter-description"
       name="twitter:description"
-      content="Split long text into clean X / Twitter and Bluesky posts in your browser. Free and no account needed. Preserve line breaks, add hashtags, number posts, and correct English or Spanish."
+      content="Write posts, save drafts and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish."
     />
     <script type="application/ld+json">
       {
@@ -48,7 +48,7 @@
         "applicationCategory": "UtilitiesApplication",
         "operatingSystem": "Any",
         "browserRequirements": "Requires JavaScript and a modern web browser.",
-        "description": "Split long text into clean X / Twitter and Bluesky posts in your browser. Free and no account needed. Preserve line breaks, add hashtags, number posts, and correct English or Spanish.",
+        "description": "Write posts, save drafts and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish.",
         "inLanguage": ["en", "es"],
         "isAccessibleForFree": true,
         "offers": {
@@ -159,11 +159,16 @@
             </label>
 
             <div class="menu-actions">
-              <button id="correct-english" class="menu-text-action" type="button">
-                Correct English
-              </button>
-              <button id="correct-spanish" class="menu-text-action" type="button">
-                Correct Spanish
+              <button id="spellcheck-text" class="menu-text-action" type="button">
+                <img
+                  class="icon-img menu-text-action-icon"
+                  src="./assets/icons/check_2_fill.svg"
+                  alt=""
+                  width="24"
+                  height="24"
+                  aria-hidden="true"
+                />
+                Spellcheck
               </button>
               <button id="clear-cache" class="menu-text-action" type="button">
                 Clear cache
@@ -235,6 +240,22 @@
     </header>
 
     <button id="menu-backdrop" class="menu-backdrop" type="button" hidden aria-label="Close menu"></button>
+    <div id="confirm-modal" class="confirm-modal" hidden>
+      <div
+        class="confirm-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-modal-title"
+        aria-describedby="confirm-modal-message"
+      >
+        <h2 class="confirm-modal-title" id="confirm-modal-title"></h2>
+        <p class="confirm-modal-message" id="confirm-modal-message"></p>
+        <div class="confirm-modal-actions">
+          <button id="confirm-modal-cancel" class="action-button confirm-modal-button" type="button">Cancel</button>
+          <button id="confirm-modal-confirm" class="action-button confirm-modal-button" type="button">Continue</button>
+        </div>
+      </div>
+    </div>
 
     <main class="app-shell">
       <section class="page-intro" id="page-intro" aria-labelledby="page-heading">
@@ -255,10 +276,10 @@
           />
         </button>
         <p class="page-eyebrow" id="page-eyebrow">Free, no account needed</p>
-        <h1 class="page-title" id="page-heading">Free Thread Splitter for X (Twitter) and Bluesky</h1>
+        <h1 class="page-title" id="page-heading">Free editor and thread splitter for X (Twitter) and Bluesky</h1>
         <p class="page-description" id="page-description">
-          Split long text into clean posts in your browser. Preserve line breaks, add hashtags,
-          number posts, and correct English or Spanish before you publish.
+          Write posts, save drafts and split long text into clean posts in your browser. Preserve
+          line breaks, add hashtags, number posts, and spellcheck before you publish.
         </p>
       </section>
 
@@ -295,7 +316,9 @@
             ></div>
           </div>
           <div class="panel-header">
-            <button class="editor-status" id="correction-status" type="button"></button>
+            <button class="editor-status" id="correction-status" type="button" hidden>
+              <span class="editor-status-label"></span>
+            </button>
             <div class="panel-actions">
               <p class="source-char-count" id="source-char-count">0 chars</p>
               <button id="paste-text" class="panel-icon-button paste-button" type="button" aria-label="Paste" title="Paste">
@@ -303,8 +326,8 @@
                   class="icon-img panel-icon"
                   src="./assets/icons/paste_fill.svg"
                   alt=""
-                  width="28"
-                  height="28"
+                  width="24"
+                  height="24"
                   aria-hidden="true"
                 />
                 <span class="panel-button-label">Paste</span>
@@ -365,8 +388,8 @@
                 class="icon-img panel-icon"
                 src="./assets/icons/clipboard_line.svg"
                 alt=""
-                width="28"
-                height="28"
+                width="24"
+                height="24"
                 aria-hidden="true"
               />
               <span class="panel-button-label">Copy</span>

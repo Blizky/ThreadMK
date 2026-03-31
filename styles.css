@@ -72,7 +72,7 @@
   --topbar-bg: rgba(246, 248, 250, 0.92);
   --menu-trigger-bg: rgba(210, 215, 220, 0.64);
   --menu-trigger-open-bg: rgba(210, 215, 220, 0.88);
-  --menu-panel-bg: #2f353a;
+  --menu-panel-bg: rgba(246, 248, 250, 0.98);
   --control-bg: #ffffff;
   --button-top: rgba(210, 215, 220, 0.96);
   --button-bottom: rgba(210, 215, 220, 0.78);
@@ -89,7 +89,7 @@
   --panel-icon-filter-hover: brightness(0) saturate(100%) invert(95%) sepia(8%) saturate(124%) hue-rotate(171deg) brightness(94%) contrast(90%);
   --toggle-icon-filter: brightness(0) saturate(100%) invert(13%) sepia(6%) saturate(739%) hue-rotate(167deg) brightness(96%) contrast(88%);
   --menu-text-active: #2b2b31;
-  --menu-text-muted: #7a858d;
+  --menu-text-muted: #4d545b;
   --menu-support-text: #2b2b31;
   --menu-support-hover: #4d545b;
   --menu-signoff-text: #2b2b31;
@@ -210,6 +210,16 @@ a {
   filter: var(--icon-filter);
 }
 
+@keyframes menu-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 .menu-panel {
   position: absolute;
   top: calc(100% + 10px);
@@ -230,6 +240,10 @@ a {
   -webkit-overflow-scrolling: touch;
 }
 
+.more-menu[open] .menu-panel {
+  animation: menu-fade-in 200ms ease;
+}
+
 .menu-backdrop {
   position: fixed;
   inset: 0;
@@ -239,6 +253,59 @@ a {
   background: transparent;
   appearance: none;
   -webkit-appearance: none;
+}
+
+.confirm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(36, 41, 45, 0.42);
+  animation: menu-fade-in 200ms ease;
+}
+
+.confirm-modal[hidden] {
+  display: none;
+}
+
+.confirm-modal-card {
+  width: min(420px, calc(100vw - 32px));
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--line-strong);
+  background: linear-gradient(180deg, var(--card-top), var(--card-bottom));
+  box-shadow: var(--shadow);
+}
+
+.confirm-modal-title {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.confirm-modal-message {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.confirm-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.confirm-modal-button {
+  width: auto;
+  min-width: 110px;
 }
 
 .menu-actions {
@@ -264,6 +331,8 @@ a {
   display: grid;
   gap: 6px;
   margin-bottom: 14px;
+  padding-top: 12px;
+  padding-bottom: 12px;
   padding-right: 40px;
 }
 
@@ -320,7 +389,7 @@ a {
 .page-title {
   margin: 0;
   color: var(--text);
-  font-size: 1.32rem;
+  font-size: 1.5rem;
   line-height: 1.08;
   letter-spacing: -0.03em;
 }
@@ -331,6 +400,7 @@ a {
   color: var(--muted);
   font-size: 0.95rem;
   line-height: 1.45;
+  white-space: pre-line;
 }
 
 .section-heading {
@@ -446,8 +516,8 @@ a {
 }
 
 .panel-icon {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   flex: 0 0 auto;
 }
 
@@ -565,6 +635,11 @@ h2 {
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+.hashtags-menu:not([hidden]),
+.drafts-menu:not([hidden]) {
+  animation: menu-fade-in 200ms ease;
 }
 
 .hashtags-menu-list,
@@ -856,6 +931,9 @@ select:focus {
 }
 
 .menu-text-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -866,6 +944,13 @@ select:focus {
   line-height: 1.2;
   text-align: left;
   cursor: pointer;
+}
+
+.menu-text-action-icon {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  filter: var(--panel-icon-filter);
 }
 
 .menu-text-action.active {
@@ -971,6 +1056,10 @@ select:focus {
   line-height: 1;
   text-align: left;
   cursor: pointer;
+}
+
+.editor-status-label {
+  display: inline-block;
 }
 
 .editor-status:disabled {

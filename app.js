@@ -53,13 +53,13 @@
   const uiStrings = {
     en: {
       threadPrefix: "[Thread]",
-      documentTitle: "Free Thread Splitter for X (Twitter) and Bluesky",
+      documentTitle: "Free editor and thread splitter for X (Twitter) and Bluesky",
       metaDescription:
-        "Split long text into clean X / Twitter and Bluesky posts in your browser. Free and no account needed. Preserve line breaks, add hashtags, number posts, and correct English or Spanish.",
+        "Write posts, save drafts and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish.",
       pageEyebrow: "Free, no account needed",
-      pageHeading: "Free Thread Splitter for X (Twitter) and Bluesky",
+      pageHeading: "Free editor and thread splitter for X (Twitter) and Bluesky",
       pageDescription:
-        "Split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and correct English or Spanish before you publish.",
+        "Write posts, save drafts and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish.",
       charactersPerPost: "Characters per post",
       customCharacterLimit: "Custom character limit",
       longForm: "Long-form",
@@ -67,8 +67,7 @@
       language: "Language",
       numberPosts: "Number posts",
       darkLight: "Dark / light",
-      correctEnglish: "Correct English",
-      correctSpanish: "Correct Spanish",
+      spellcheck: "Spellcheck",
       clearCache: "Clear cache",
       supportTitle: "Give if you're able",
       signoff: "Made by Alex with",
@@ -96,11 +95,17 @@
       copied: "Copied",
       copyPost: "Copy post",
       copyFailed: "Copy failed in this browser. Try selecting the text manually.",
-      correctAction: "Correct {language}",
-      correctingEnglish: "Correcting English...",
-      correctingSpanish: "Correcting Spanish...",
-      correctingText: "Correcting text...",
-      noChangesNeeded: "No changes needed ({language})",
+      spellcheckMismatchGeneric:
+        "It seems that this text is not {language}. Currently spellchecking only works for English and Spanish.",
+      spellcheckSwitchSpanish:
+        "It seems that this text is not English. Currently spellchecking only works for English and Spanish.\n\nDo you want to check in Spanish?",
+      spellcheckPromptTitle: "Spellcheck Language",
+      cancel: "Cancel",
+      continue: "Continue",
+      yes: "Yes",
+      correctAction: "Spellcheck",
+      correctingText: "Spellchecking...",
+      noChangesNeeded: "No changes needed.",
       correctedIssue_one: "Corrected {count} issue",
       correctedIssue_other: "Corrected {count} issues",
       flaggedTerm_one: "flagged {count} suspicious term",
@@ -118,13 +123,13 @@
     },
     es: {
       threadPrefix: "[Hilo]",
-      documentTitle: "Creador gratuito de hilos para X (Twitter) y Bluesky",
+      documentTitle: "Editor y creador gratuito de hilos para X (Twitter) y Bluesky",
       metaDescription:
-        "Divide texto largo en publicaciones limpias para X / Twitter y Bluesky desde tu navegador. Gratis y sin cuenta. Preserva saltos de linea, agrega hashtags, numera publicaciones y corrige ingles o espanol.",
+        "Escribe publicaciones, guarda borradores y divide texto largo en publicaciones limpias desde tu navegador. Preserva saltos de linea, agrega hashtags, numera publicaciones y revisa ortografia antes de publicar.",
       pageEyebrow: "Gratis y sin cuenta",
-      pageHeading: "Creador gratuito de hilos para X (Twitter) y Bluesky",
+      pageHeading: "Editor y creador gratuito de hilos para X (Twitter) y Bluesky",
       pageDescription:
-        "Divide texto largo en publicaciones limpias desde tu navegador. Preserva saltos de linea, agrega hashtags, numera publicaciones y corrige ingles o espanol antes de publicar.",
+        "Escribe publicaciones, guarda borradores y divide texto largo en publicaciones limpias desde tu navegador. Preserva saltos de linea, agrega hashtags, numera publicaciones y revisa ortografia antes de publicar.",
       charactersPerPost: "Caracteres por publicacion",
       customCharacterLimit: "Limite personalizado de caracteres",
       longForm: "Texto largo",
@@ -132,8 +137,7 @@
       language: "Idioma",
       numberPosts: "Numerar publicaciones",
       darkLight: "Oscuro / claro",
-      correctEnglish: "Corregir ingles",
-      correctSpanish: "Corregir espanol",
+      spellcheck: "Revisar ortografia",
       clearCache: "Borrar cache",
       supportTitle: "Apoya si puedes",
       signoff: "Hecho por Alex con",
@@ -161,11 +165,17 @@
       copied: "Copiado",
       copyPost: "Copiar publicacion",
       copyFailed: "La copia fallo en este navegador. Intenta seleccionar el texto manualmente.",
-      correctAction: "Corregir {language}",
-      correctingEnglish: "Corrigiendo ingles...",
-      correctingSpanish: "Corrigiendo espanol...",
-      correctingText: "Corrigiendo texto...",
-      noChangesNeeded: "No se necesitan cambios ({language})",
+      spellcheckMismatchGeneric:
+        "Parece que este texto no esta en {language}. Actualmente la revision ortografica solo funciona para ingles y espanol.",
+      spellcheckSwitchSpanish:
+        "Parece que este texto no esta en ingles. Actualmente la revision ortografica solo funciona para ingles y espanol.\n\nQuieres revisar en espanol?",
+      spellcheckPromptTitle: "Idioma de revision",
+      cancel: "Cancelar",
+      continue: "Continuar",
+      yes: "Si",
+      correctAction: "Revisar ortografia",
+      correctingText: "Revisando ortografia...",
+      noChangesNeeded: "No se necesitan cambios.",
       correctedIssue_one: "Corregido {count} problema",
       correctedIssue_other: "Corregidos {count} problemas",
       flaggedTerm_one: "marcado {count} termino sospechoso",
@@ -186,7 +196,6 @@
   const ignoredCorrections = new Set();
 
   let selectedLanguage = "en";
-  let languageSetManually = false;
   let interfaceLanguage = "en";
 
   function uiText(key, replacements = {}, locale = interfaceLanguage) {
@@ -219,7 +228,10 @@
   }
 
   function normalizeText(value) {
-    return value.replace(/\r\n?/g, "\n").trim();
+    return String(value || "")
+      .replace(/\r\n?/g, "\n")
+      .replace(/[\u200B-\u200D\uFEFF]/g, "")
+      .trim();
   }
 
   function getThreadPrefix(language = selectedLanguage) {
@@ -486,7 +498,7 @@
     };
   }
 
-  function shouldIgnoreCorrection(text, match) {
+  function shouldIgnoreCorrection(text, match, language = "en") {
     const original = text.slice(match.offset, match.offset + match.length);
     const replacement = match.replacements?.[0]?.value || "";
     const prevChar = match.offset > 0 ? text[match.offset - 1] : "";
@@ -505,7 +517,7 @@
       return true;
     }
 
-    if (originalAsciiWord && replacementHasNonAscii) {
+    if (language !== "es" && originalAsciiWord && replacementHasNonAscii) {
       return true;
     }
 
@@ -516,12 +528,12 @@
     return false;
   }
 
-  function applyLanguageToolFixes(text, matches) {
+  function applyLanguageToolFixes(text, matches, language = "en") {
     const ignoredRanges = [];
     const edits = matches
       .filter((match) => match.replacements && match.replacements.length)
       .filter((match) => {
-        if (shouldIgnoreCorrection(text, match)) {
+        if (shouldIgnoreCorrection(text, match, language)) {
           ignoredRanges.push({
             start: match.offset,
             end: match.offset + match.length,
@@ -759,7 +771,7 @@
       }
 
       const data = await response.json();
-      const result = applyLanguageToolFixes(original, data.matches || []);
+      const result = applyLanguageToolFixes(original, data.matches || [], activeLanguage);
       edits = result.edits;
       ignoredRanges = result.ignoredRanges;
       method = "languagetool";
@@ -1384,6 +1396,11 @@
     const form = document.getElementById("thread-form");
     const moreMenu = document.getElementById("more-menu");
     const menuBackdrop = document.getElementById("menu-backdrop");
+    const confirmModal = document.getElementById("confirm-modal");
+    const confirmModalTitle = document.getElementById("confirm-modal-title");
+    const confirmModalMessage = document.getElementById("confirm-modal-message");
+    const confirmModalCancelButton = document.getElementById("confirm-modal-cancel");
+    const confirmModalConfirmButton = document.getElementById("confirm-modal-confirm");
     const platformLimit = document.getElementById("platform-limit");
     const customLimit = document.getElementById("custom-limit");
     const preserveLineBreaksInput = document.getElementById("preserve-line-breaks");
@@ -1397,10 +1414,10 @@
     const draftsMenu = document.getElementById("drafts-menu");
     const draftsMenuList = document.getElementById("drafts-menu-list");
     const themeToggle = document.getElementById("theme-toggle");
-    const correctEnglishButton = document.getElementById("correct-english");
-    const correctSpanishButton = document.getElementById("correct-spanish");
+    const correctButton = document.getElementById("spellcheck-text");
     const clearCacheButton = document.getElementById("clear-cache");
     const correctionStatus = document.getElementById("correction-status");
+    const correctionStatusLabel = correctionStatus.querySelector(".editor-status-label");
     const sourceCharCount = document.getElementById("source-char-count");
     const hashtagsInput = document.getElementById("hashtags");
     const saveHashtagsButton = document.getElementById("save-hashtags");
@@ -1434,6 +1451,7 @@
     const platformCustomOption = platformLimit.querySelector('option[value="custom"]');
     const languageEnglishOption = languageSelect.querySelector('option[value="en"]');
     const languageSpanishOption = languageSelect.querySelector('option[value="es"]');
+    let confirmModalResolver = null;
 
     function getSplitModeValue() {
       return preserveLineBreaksInput.checked ? "paragraph" : "compact";
@@ -1547,8 +1565,7 @@
       languageSelectLabel.textContent = uiText("language");
       numberingTitle.textContent = uiText("numberPosts");
       themeTitle.textContent = uiText("darkLight");
-      correctEnglishButton.textContent = uiText("correctEnglish");
-      correctSpanishButton.textContent = uiText("correctSpanish");
+      correctButton.textContent = uiText("spellcheck");
       clearCacheButton.textContent = uiText("clearCache");
       supportTitleText.textContent = uiText("supportTitle");
       sourceInput.dataset.placeholder = uiText("enterTextHere");
@@ -1562,6 +1579,8 @@
       dismissIntroButton.setAttribute("title", uiText("hideIntro"));
       loadDraftButton.setAttribute("aria-label", uiText("loadDraft"));
       loadDraftButton.setAttribute("title", uiText("loadDraft"));
+      confirmModalTitle.textContent = uiText("spellcheckPromptTitle");
+      confirmModalCancelButton.textContent = uiText("cancel");
       pasteButtonLabel.textContent = uiText("paste");
       if (pasteButton.getAttribute("aria-label") !== uiText("pasted")) {
         pasteButton.setAttribute("aria-label", uiText("paste"));
@@ -1609,6 +1628,31 @@
       }
     }
 
+    function closeConfirmModal(result = false) {
+      if (!confirmModalResolver) {
+        confirmModal.hidden = true;
+        return;
+      }
+
+      const resolve = confirmModalResolver;
+      confirmModalResolver = null;
+      confirmModal.hidden = true;
+      resolve(Boolean(result));
+    }
+
+    function openConfirmModal(options = {}) {
+      confirmModalTitle.textContent = options.title || uiText("spellcheckPromptTitle");
+      confirmModalMessage.textContent = options.message || "";
+      confirmModalCancelButton.textContent = options.cancelLabel || uiText("cancel");
+      confirmModalConfirmButton.textContent = options.confirmLabel || uiText("continue");
+      confirmModal.hidden = false;
+      confirmModalConfirmButton.focus();
+
+      return new Promise((resolve) => {
+        confirmModalResolver = resolve;
+      });
+    }
+
     function applyInterfaceLanguage(language, options = {}) {
       interfaceLanguage = language === "es" ? "es" : "en";
 
@@ -1617,9 +1661,9 @@
       }
 
       document.documentElement.lang = interfaceLanguage;
+      applyLanguageSelection(interfaceLanguage);
       applyUiTranslations();
       syncLanguageStatus();
-      syncCorrectActionState();
 
       if (options.persist) {
         try {
@@ -1655,8 +1699,6 @@
             customLimit: customLimit.value,
             splitMode: getSplitModeValue(),
             numbering: numberingInput.checked,
-            selectedLanguage,
-            languageSetManually,
             activeSavedDraftId,
           }),
         );
@@ -1690,12 +1732,6 @@
         typeof draft.activeSavedDraftId === "string" && draft.activeSavedDraftId.trim()
           ? draft.activeSavedDraftId
           : null;
-
-      if (typeof draft.selectedLanguage === "string") {
-        applyLanguageSelection(draft.selectedLanguage, {
-          manual: Boolean(draft.languageSetManually),
-        });
-      }
 
       return true;
     }
@@ -2071,12 +2107,9 @@
     let sourceMarkupActive = false;
 
     function setCorrectionStatus(message) {
-      correctionStatus.textContent = message;
-    }
-
-    function syncCorrectActionState() {
-      correctEnglishButton.classList.toggle("active", selectedLanguage === "en");
-      correctSpanishButton.classList.toggle("active", selectedLanguage === "es");
+      const hasMessage = Boolean(String(message || "").trim());
+      correctionStatusLabel.textContent = message;
+      correctionStatus.hidden = !hasMessage;
     }
 
     function getSourceText() {
@@ -2210,7 +2243,7 @@
 
     function syncLanguageStatus() {
       const hasText = Boolean(normalizeText(getSourceText()));
-      setCorrectionStatus(hasText ? uiText("correctAction", { language: getLanguageLabel(selectedLanguage) }) : "");
+      setCorrectionStatus(hasText ? uiText("correctAction") : "");
     }
 
     function updateSourceCharCount() {
@@ -2225,29 +2258,14 @@
       );
     }
 
-    function applyLanguageSelection(language, options = {}) {
+    function applyLanguageSelection(language) {
       selectedLanguage = language === "es" ? "es" : "en";
-      if (options.manual) {
-        languageSetManually = true;
-      }
-      syncCorrectActionState();
       syncLanguageStatus();
-    }
-
-    function maybeApplySuggestedLanguage(text) {
-      const suggested = detectSuggestedLanguage(text);
-
-      if (!languageSetManually && suggested.language && suggested.confidence >= 0.18) {
-        if (suggested.language !== selectedLanguage) {
-          applyLanguageSelection(suggested.language);
-        }
-      }
     }
 
     function updateCorrectButtonState() {
       const disabled = !normalizeText(getSourceText());
-      correctEnglishButton.disabled = disabled;
-      correctSpanishButton.disabled = disabled;
+      correctButton.disabled = disabled;
       correctionStatus.disabled = disabled;
     }
 
@@ -2494,20 +2512,56 @@
       }
     }
 
-    async function handleCorrection(language) {
+    async function resolveSpellcheckLanguage(text) {
+      const currentLanguage = interfaceLanguage === "es" ? "es" : "en";
+      const suggested = detectSuggestedLanguage(text);
+
+      if (!suggested.language || suggested.language === currentLanguage || suggested.confidence < 0.18) {
+        return currentLanguage;
+      }
+
+      if (suggested.language === "es" && currentLanguage !== "es") {
+        const shouldSwitchToSpanish = await openConfirmModal({
+          message: uiText("spellcheckSwitchSpanish"),
+          confirmLabel: uiText("yes"),
+        });
+        if (!shouldSwitchToSpanish) {
+          return null;
+        }
+
+        applyInterfaceLanguage("es", { persist: true });
+        render();
+        return "es";
+      }
+
+      const continueWithCurrentLanguage = await openConfirmModal({
+        message: uiText("spellcheckMismatchGeneric", {
+          language: getLanguageLabel(currentLanguage, { locale: interfaceLanguage, capitalize: true }),
+        }),
+        confirmLabel: uiText("continue"),
+      });
+
+      return continueWithCurrentLanguage ? currentLanguage : null;
+    }
+
+    async function handleCorrection() {
       const rawText = getSourceText();
       if (!normalizeText(rawText)) {
         return;
       }
 
-      applyLanguageSelection(language, { manual: true });
       moreMenu.open = false;
+
+      const language = await resolveSpellcheckLanguage(rawText);
+      if (!language) {
+        return;
+      }
+
       correctionStatus.disabled = true;
-      correctEnglishButton.disabled = true;
-      correctSpanishButton.disabled = true;
-      const button = language === "es" ? correctSpanishButton : correctEnglishButton;
+      correctButton.disabled = true;
+      const button = correctButton;
       const originalLabel = button.textContent;
-      button.textContent = language === "es" ? uiText("correctingSpanish") : uiText("correctingEnglish");
+      button.textContent = uiText("correctingText");
       setCorrectionStatus(uiText("correctingText"));
 
       try {
@@ -2520,7 +2574,7 @@
         render();
 
         if (!result.changes && !result.ignoredRanges.length) {
-          setCorrectionStatus(uiText("noChangesNeeded", { language: getLanguageLabel(language) }));
+          setCorrectionStatus(uiText("noChangesNeeded"));
         } else if (result.method === "languagetool") {
           const parts = [];
           if (result.changes) {
@@ -2725,7 +2779,6 @@
       activeSavedDraftId = draft.id;
       setSourceText(draft.sourceText);
       hashtagsInput.value = draft.hashtags;
-      maybeApplySuggestedLanguage(draft.sourceText);
       setBanner("");
       closeDraftsMenu();
       render();
@@ -2825,7 +2878,6 @@
         setSourceText("");
       }
 
-      maybeApplySuggestedLanguage(currentText);
       render();
     }
 
@@ -2856,7 +2908,7 @@
     sourceInput.addEventListener("input", handleSourceInput);
     sourceInput.addEventListener("click", handleSourceClick);
     sourceInput.addEventListener("paste", handleSourcePaste);
-    correctionStatus.addEventListener("click", () => handleCorrection(selectedLanguage));
+    correctionStatus.addEventListener("click", handleCorrection);
     hashtagsInput.addEventListener("input", handleHashtagsInput);
     platformLimit.addEventListener("change", render);
     customLimit.addEventListener("input", render);
@@ -2864,6 +2916,7 @@
     languageSelect.addEventListener("change", () => {
       applyInterfaceLanguage(languageSelect.value, { persist: true });
       render();
+      moreMenu.open = false;
     });
     pasteButton.addEventListener("click", handlePasteFromClipboard);
     dismissIntroButton.addEventListener("click", () => {
@@ -2874,6 +2927,13 @@
     loadDraftButton.addEventListener("click", handleLoadDraftsClick);
     saveHashtagsButton.addEventListener("click", handleSaveHashtags);
     loadHashtagsButton.addEventListener("click", handleLoadHashtagsClick);
+    confirmModalCancelButton.addEventListener("click", () => closeConfirmModal(false));
+    confirmModalConfirmButton.addEventListener("click", () => closeConfirmModal(true));
+    confirmModal.addEventListener("click", (event) => {
+      if (event.target === confirmModal) {
+        closeConfirmModal(false);
+      }
+    });
     draftsMenuList.addEventListener("click", handleDraftMenuClick);
     hashtagsMenuList.addEventListener("change", handleHashtagMenuChange);
     hashtagsMenuList.addEventListener("click", handleHashtagMenuClick);
@@ -2883,11 +2943,11 @@
         moreMenu.open = false;
       });
     }
-    correctEnglishButton.addEventListener("click", () => handleCorrection("en"));
-    correctSpanishButton.addEventListener("click", () => handleCorrection("es"));
+    correctButton.addEventListener("click", handleCorrection);
     clearCacheButton.addEventListener("click", handleClearCache);
     themeToggle.addEventListener("change", () => {
       applyTheme(themeToggle.checked ? "light" : "dark");
+      moreMenu.open = false;
     });
     if (window.PointerEvent) {
       document.addEventListener("pointerdown", closeMenuOnOutsidePress, true);
@@ -2904,6 +2964,11 @@
     });
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
+        if (!confirmModal.hidden) {
+          closeConfirmModal(false);
+          return;
+        }
+
         if (moreMenu.open) {
           moreMenu.open = false;
         }
@@ -2924,9 +2989,7 @@
     applyIntroVisibility(loadIntroDismissedPreference());
     applyInterfaceLanguage(loadInterfaceLanguagePreference() || initialBrowserLanguage || "en");
     syncMoreMenuState();
-    if (!restoreDraftState()) {
-      applyLanguageSelection(initialBrowserLanguage || "en");
-    }
+    restoreDraftState();
     render();
   }
 
