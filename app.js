@@ -1478,6 +1478,58 @@
       }
     }
 
+    function getScopedStorageKey(baseKey, language = interfaceLanguage) {
+      const safeLanguage = language === "es" ? "es" : "en";
+      return `${baseKey}_${safeLanguage}`;
+    }
+
+    function readStorageItem(key) {
+      try {
+        return window.localStorage.getItem(key);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function writeStorageItem(key, value) {
+      try {
+        window.localStorage.setItem(key, value);
+      } catch (error) {
+        return false;
+      }
+
+      return true;
+    }
+
+    function removeStorageItem(key) {
+      try {
+        window.localStorage.removeItem(key);
+      } catch (error) {
+        return false;
+      }
+
+      return true;
+    }
+
+    function readScopedStorageItem(baseKey, language = interfaceLanguage) {
+      const scopedKey = getScopedStorageKey(baseKey, language);
+      const scopedValue = readStorageItem(scopedKey);
+      if (scopedValue !== null) {
+        return scopedValue;
+      }
+
+      const legacyValue = readStorageItem(baseKey);
+      if (legacyValue === null) {
+        return null;
+      }
+
+      if (writeStorageItem(scopedKey, legacyValue)) {
+        removeStorageItem(baseKey);
+      }
+
+      return legacyValue;
+    }
+
     function loadIntroDismissedPreference() {
       try {
         return window.localStorage.getItem(INTRO_DISMISSED_STORAGE_KEY) === "true";
@@ -1757,7 +1809,7 @@
 
     function loadSavedDrafts() {
       try {
-        const stored = window.localStorage.getItem(SAVED_DRAFTS_STORAGE_KEY);
+        const stored = readScopedStorageItem(SAVED_DRAFTS_STORAGE_KEY);
         if (!stored) {
           return [];
         }
@@ -1791,7 +1843,7 @@
     function saveSavedDrafts(drafts) {
       try {
         window.localStorage.setItem(
-          SAVED_DRAFTS_STORAGE_KEY,
+          getScopedStorageKey(SAVED_DRAFTS_STORAGE_KEY),
           JSON.stringify(
             drafts
               .filter((entry) => entry && typeof entry === "object")
@@ -1843,7 +1895,7 @@
 
     function loadSavedHashtags() {
       try {
-        const stored = window.localStorage.getItem(SAVED_HASHTAGS_STORAGE_KEY);
+        const stored = readScopedStorageItem(SAVED_HASHTAGS_STORAGE_KEY);
         if (!stored) {
           return [];
         }
@@ -1866,7 +1918,7 @@
     function saveSavedHashtags(values) {
       try {
         window.localStorage.setItem(
-          SAVED_HASHTAGS_STORAGE_KEY,
+          getScopedStorageKey(SAVED_HASHTAGS_STORAGE_KEY),
           JSON.stringify(
             Array.from(
               new Set(
@@ -2607,6 +2659,10 @@
           window.localStorage.removeItem(INTRO_DISMISSED_STORAGE_KEY);
           window.localStorage.removeItem(SAVED_DRAFTS_STORAGE_KEY);
           window.localStorage.removeItem(SAVED_HASHTAGS_STORAGE_KEY);
+          window.localStorage.removeItem(getScopedStorageKey(SAVED_DRAFTS_STORAGE_KEY, "en"));
+          window.localStorage.removeItem(getScopedStorageKey(SAVED_DRAFTS_STORAGE_KEY, "es"));
+          window.localStorage.removeItem(getScopedStorageKey(SAVED_HASHTAGS_STORAGE_KEY, "en"));
+          window.localStorage.removeItem(getScopedStorageKey(SAVED_HASHTAGS_STORAGE_KEY, "es"));
         } catch (error) {
           // Ignore storage failures and continue clearing what we can.
         }
