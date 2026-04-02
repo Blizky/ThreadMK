@@ -88,7 +88,7 @@
           <summary class="more-trigger">
             <img
               class="icon-img"
-              src="./assets/icons/menu_fill.svg"
+              src="./assets/icons/settings_3_fill.svg"
               alt=""
               width="28"
               height="28"
@@ -110,6 +110,16 @@
               </div>
               <span class="toggle-control">
                 <input id="theme-toggle" name="theme-toggle" type="checkbox" />
+                <span class="toggle-icon" aria-hidden="true"></span>
+              </span>
+            </label>
+
+            <label class="toggle-row" for="large-text-toggle">
+              <div>
+                <span class="toggle-title">Larger text</span>
+              </div>
+              <span class="toggle-control">
+                <input id="large-text-toggle" name="large-text-toggle" type="checkbox" />
                 <span class="toggle-icon" aria-hidden="true"></span>
               </span>
             </label>
@@ -138,9 +148,10 @@
               />
             </div>
 
-            <label class="toggle-row" for="preserve-line-breaks">
-              <div>
+            <label class="toggle-row menu-setting-tooltip-row" for="preserve-line-breaks">
+              <div class="menu-setting-tooltip-wrap">
                 <span class="toggle-title">Preserve line breaks</span>
+                <span id="preserve-line-breaks-tooltip" class="post-hashtag-tooltip menu-setting-tooltip" role="tooltip">Keeps your line and paragraph breaks when splitting text into posts.</span>
               </div>
               <span class="toggle-control">
                 <input id="preserve-line-breaks" name="preserve-line-breaks" type="checkbox" />
@@ -148,9 +159,10 @@
               </span>
             </label>
 
-            <label class="toggle-row" for="include-numbering">
-              <div>
+            <label class="toggle-row menu-setting-tooltip-row" for="include-numbering">
+              <div class="menu-setting-tooltip-wrap">
                 <span class="toggle-title">Number posts</span>
+                <span id="number-posts-tooltip" class="post-hashtag-tooltip menu-setting-tooltip" role="tooltip">Adds numbering like 1/3, 2/3 and 3/3 to generated posts.</span>
               </div>
               <span class="toggle-control">
                 <input id="include-numbering" name="include-numbering" type="checkbox" checked />
@@ -158,9 +170,10 @@
               </span>
             </label>
 
-            <label class="toggle-row" for="support-threadmk">
-              <div>
+            <label class="toggle-row menu-setting-tooltip-row" for="support-threadmk">
+              <div class="menu-setting-tooltip-wrap">
                 <span class="toggle-title">Support #ThreadMK</span>
+                <span id="support-threadmk-tooltip" class="post-hashtag-tooltip menu-setting-tooltip" role="tooltip">Adds #ThreadMK to the end of the hashtag list on generated posts.</span>
               </div>
               <span class="toggle-control">
                 <input id="support-threadmk" name="support-threadmk" type="checkbox" checked />
@@ -168,18 +181,19 @@
               </span>
             </label>
 
+            <div class="field-group menu-inline-field menu-setting-tooltip-field">
+              <label for="compression-strength" class="menu-setting-tooltip-wrap">
+                <span id="compression-strength-label">Compression</span>
+                <span id="compression-strength-tooltip" class="post-hashtag-tooltip menu-setting-tooltip" role="tooltip">AI function that shortens your text while keeping the main idea. Soft makes light changes, Medium rewrites a bit more, and Heavy edits more aggressively.</span>
+              </label>
+              <select id="compression-strength" name="compression-strength" class="menu-compact-control">
+                <option value="soft">Soft</option>
+                <option value="medium" selected>Medium</option>
+                <option value="heavy">Heavy</option>
+              </select>
+            </div>
+
             <div class="menu-actions">
-              <button id="spellcheck-text" class="menu-text-action" type="button">
-                <img
-                  class="icon-img menu-text-action-icon"
-                  src="./assets/icons/check_2_fill.svg"
-                  alt=""
-                  width="24"
-                  height="24"
-                  aria-hidden="true"
-                />
-                Spellcheck
-              </button>
               <button id="clear-cache" class="menu-text-action" type="button">
                 Clear cache
               </button>
@@ -266,6 +280,66 @@
         </div>
       </div>
     </div>
+    <div id="support-prompt-modal" class="confirm-modal" hidden>
+      <div
+        class="confirm-modal-card support-prompt-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="support-prompt-title"
+        aria-describedby="support-prompt-message"
+      >
+        <h2 class="confirm-modal-title support-prompt-title" id="support-prompt-title">Give if you're able</h2>
+        <p class="support-prompt-message" id="support-prompt-message">Help keep ThreadMK free and awesome. Your support helps cover AI and hosting costs. If it saves you time, consider backing it.</p>
+        <div class="support-prompt-links menu-support">
+          <a
+            id="support-prompt-kofi"
+            class="support-prompt-link menu-support-link"
+            href="https://ko-fi.com/blizky"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img
+              class="menu-support-link-icon"
+              src="./assets/svg/ko-fi.svg"
+              alt=""
+              width="16"
+              height="16"
+              aria-hidden="true"
+            />
+            <span id="support-prompt-kofi-label">ko-fi.com/blizky</span>
+          </a>
+          <a
+            id="support-prompt-paypal"
+            class="support-prompt-link menu-support-link"
+            href="https://paypal.me/blizky"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img
+              class="menu-support-link-icon"
+              src="./assets/svg/paypal_fill.svg"
+              alt=""
+              width="16"
+              height="16"
+              aria-hidden="true"
+            />
+            <span id="support-prompt-paypal-label">paypal.me/blizky</span>
+          </a>
+        </div>
+        <div class="confirm-modal-actions support-prompt-actions">
+          <label class="toggle-row support-prompt-toggle-row" for="support-prompt-enable">
+            <div>
+              <span class="toggle-title" id="support-prompt-enable-title">Enable <span class="menu-threadmk-accent">#ThreadMK</span></span>
+            </div>
+            <span class="toggle-control">
+              <input id="support-prompt-enable" name="support-prompt-enable" type="checkbox" />
+              <span class="toggle-icon" aria-hidden="true"></span>
+            </span>
+          </label>
+          <button id="support-prompt-ok" class="action-button confirm-modal-button support-prompt-ok-button" type="button">OK</button>
+        </div>
+      </div>
+    </div>
 
     <main class="app-shell">
       <section class="page-intro" id="page-intro" aria-labelledby="page-heading">
@@ -327,9 +401,14 @@
             ></div>
           </div>
           <div class="panel-header">
-            <button class="editor-status" id="correction-status" type="button" hidden>
-              <span class="editor-status-label"></span>
-            </button>
+            <div class="editor-status" id="correction-status" hidden>
+              <div class="editor-status-actions" id="correction-status-actions">
+                <button class="editor-status-action" id="inline-spellcheck" type="button">Spellcheck</button>
+                <span class="editor-status-separator" aria-hidden="true">|</span>
+                <button class="editor-status-action" id="inline-compress" type="button">Compress</button>
+              </div>
+              <span class="editor-status-label" id="correction-status-label" hidden></span>
+            </div>
             <div class="panel-actions">
               <p class="source-char-count" id="source-char-count">0 chars</p>
               <button id="paste-text" class="panel-icon-button paste-button" type="button" aria-label="Paste" title="Paste">

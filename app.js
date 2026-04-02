@@ -5,8 +5,15 @@
   const SAVED_DRAFTS_STORAGE_KEY = "threadmaker_saved_drafts";
   const SAVED_HASHTAGS_STORAGE_KEY = "threadmaker_saved_hashtags";
   const UI_LANGUAGE_STORAGE_KEY = "threadmaker_ui_language";
+  const TEXT_SIZE_STORAGE_KEY = "threadmaker_text_size";
+  const SUPPORT_PROMPT_COUNTER_STORAGE_KEY = "threadmaker_support_prompt_counter";
   const SUPPORT_HASHTAG = "#ThreadMK";
   const MAX_TRANSLATION_SOURCE_CHARACTERS = 2500;
+  const MIN_TRANSLATION_SOURCE_CHARACTERS = 100;
+  const MAX_COMPRESSION_SOURCE_CHARACTERS = 2500;
+  const MIN_COMPRESSION_SOURCE_CHARACTERS = 200;
+  const SUPPORT_PROMPT_TRIGGER_COUNT = 10;
+  const SUPPORT_PROMPT_DELAY_MS = 500;
   const alwaysCorrectByLanguage = {
     es: new Set(["mas"]),
     en: new Set(),
@@ -66,14 +73,36 @@
       customCharacterLimit: "Custom character limit",
       longForm: "Long-form",
       preserveLineBreaks: "Preserve line breaks",
+      preserveLineBreaksTooltip:
+        "Keeps your line and paragraph breaks when splitting text into posts.",
       language: "Language",
       numberPosts: "Number posts",
+      numberPostsTooltip: "Adds numbering like 1/3, 2/3 and 3/3 to generated posts.",
       supportThreadMk: "Support #ThreadMK",
-      supportThreadMkTitle: "#ThreadMK",
+      supportThreadMkPrefix: "Support",
+      supportThreadMkTooltip:
+        "Adds #ThreadMK to the end of the hashtag list on generated posts.",
+      compressionStrength: "Compression",
+      compressionStrengthTooltip:
+        "AI function that shortens your text while keeping the main idea. Soft makes light changes, Medium rewrites a bit more, and Heavy edits more aggressively.",
+      compressSoft: "Soft",
+      compressMedium: "Medium",
+      compressHeavy: "Heavy",
       supportThreadMkMessage:
-        "Support ThreadMK sharing this hashtag. You can disable it from the menu.",
+        "Support ThreadMK sharing this hashtag. You can disable it from Settings.",
+      supportPromptTitle: "Give if you're able",
+      supportPromptMessage:
+        "Help keep ThreadMK free and awesome. Your support helps cover AI and hosting costs. If it saves you time, consider backing it.",
+      supportPromptEnableTitle: "Enable #ThreadMK",
+      supportPromptKofi: "ko-fi.com/blizky",
+      supportPromptPaypal: "paypal.me/blizky",
+      ok: "OK",
       darkLight: "Dark / light",
+      largerText: "Larger text",
       spellcheck: "Spellcheck",
+      compress: "Compress",
+      compressing: "Compressing...",
+      compressedBy: "Shortened by {count} chars.",
       clearCache: "Clear cache",
       supportTitle: "Give if you're able",
       signoff: "Made by Alex with",
@@ -87,8 +116,9 @@
       save: "Save",
       load: "Load",
       newDraft: "New",
-      saveDraft: "Save draft",
-      loadDraft: "Load draft",
+      saveDraft: "Save idea",
+      savedDraft: "Saved",
+      loadDraft: "Load idea",
       hideIntro: "Hide intro",
       noSavedDrafts: "No saved drafts.",
       deleteSavedDraft: "Delete saved draft",
@@ -106,13 +136,14 @@
       translationFailed: "Translation failed. Please try again.",
       translationLimitReached:
         "Translation currently supports up to {count} characters in the source text.",
+      compressionLimitReached:
+        "Compression currently supports up to {count} characters in the source text.",
       spellcheckMismatchGeneric:
         "It seems that this text is not {language}. Currently spellchecking only works for English and Spanish.",
       spellcheckSwitchSpanish:
         "It seems that this text is not English. Currently spellchecking only works for English and Spanish.\n\nDo you want to check in Spanish?",
       spellcheckPromptTitle: "Spellcheck Language",
       cancel: "Cancel",
-      ok: "OK",
       continue: "Continue",
       yes: "Yes",
       correctAction: "Spellcheck",
@@ -126,6 +157,8 @@
       fallbackFix_one: "Applied {count} fallback fix",
       fallbackFix_other: "Applied {count} fallback fixes",
       correctionFailed: "Correction failed",
+      compressionFailed: "Compression failed. Please try again.",
+      compressionNoChanges: "No shorter version found.",
       clearingCache: "Clearing cache...",
       cacheClearFailed: "Cache clear failed.",
       invalidCharacterLimit: "Please choose a valid character limit.",
@@ -146,14 +179,37 @@
       customCharacterLimit: "Limite personalizado de caracteres",
       longForm: "Texto largo",
       preserveLineBreaks: "Preservar saltos de linea",
+      preserveLineBreaksTooltip:
+        "Mantiene tus saltos de linea y parrafos al dividir el texto en publicaciones.",
       language: "Idioma",
       numberPosts: "Numerar publicaciones",
+      numberPostsTooltip:
+        "Agrega numeracion como 1/3, 2/3 y 3/3 a las publicaciones generadas.",
       supportThreadMk: "Apoyar #ThreadMK",
-      supportThreadMkTitle: "#ThreadMK",
+      supportThreadMkPrefix: "Apoyar",
+      supportThreadMkTooltip:
+        "Agrega #ThreadMK al final de la lista de hashtags en las publicaciones generadas.",
+      compressionStrength: "Compresion",
+      compressionStrengthTooltip:
+        "Funcion de IA que acorta tu texto manteniendo la idea principal. Suave hace cambios leves, Medio reescribe un poco mas y Fuerte edita con mas agresividad.",
+      compressSoft: "Suave",
+      compressMedium: "Media",
+      compressHeavy: "Fuerte",
       supportThreadMkMessage:
-        "Apoya a ThreadMK compartiendo este hashtag. Puedes desactivarlo desde el menu.",
+        "Apoya a ThreadMK compartiendo este hashtag. Puedes desactivarlo desde Ajustes.",
+      supportPromptTitle: "Apoya si puedes",
+      supportPromptMessage:
+        "Ayuda a mantener ThreadMK gratis y genial. Tu apoyo ayuda a cubrir los costos de IA y alojamiento. Si te ahorra tiempo, considera apoyarlo.",
+      supportPromptEnableTitle: "Activar #ThreadMK",
+      supportPromptKofi: "ko-fi.com/blizky",
+      supportPromptPaypal: "paypal.me/blizky",
+      ok: "OK",
       darkLight: "Oscuro / claro",
+      largerText: "Texto mas grande",
       spellcheck: "Revisar ortografia",
+      compress: "Comprimir",
+      compressing: "Comprimiendo...",
+      compressedBy: "Acortado por {count} caracteres.",
       clearCache: "Borrar cache",
       supportTitle: "Apoya si puedes",
       signoff: "Hecho por Alex con",
@@ -167,8 +223,9 @@
       save: "Guardar",
       load: "Cargar",
       newDraft: "Nuevo",
-      saveDraft: "Guardar borrador",
-      loadDraft: "Cargar borrador",
+      saveDraft: "Guardar idea",
+      savedDraft: "Guardada",
+      loadDraft: "Cargar idea",
       hideIntro: "Ocultar introduccion",
       noSavedDrafts: "No hay borradores guardados.",
       deleteSavedDraft: "Eliminar borrador guardado",
@@ -186,13 +243,14 @@
       translationFailed: "La traduccion fallo. Intenta de nuevo.",
       translationLimitReached:
         "La traduccion actualmente admite hasta {count} caracteres en el texto de origen.",
+      compressionLimitReached:
+        "La compresion actualmente admite hasta {count} caracteres en el texto de origen.",
       spellcheckMismatchGeneric:
         "Parece que este texto no esta en {language}. Actualmente la revision ortografica solo funciona para ingles y espanol.",
       spellcheckSwitchSpanish:
         "Parece que este texto no esta en ingles. Actualmente la revision ortografica solo funciona para ingles y espanol.\n\nQuieres revisar en espanol?",
       spellcheckPromptTitle: "Idioma de revision",
       cancel: "Cancelar",
-      ok: "OK",
       continue: "Continuar",
       yes: "Si",
       correctAction: "Revisar ortografia",
@@ -206,6 +264,8 @@
       fallbackFix_one: "Aplicada {count} correccion alternativa",
       fallbackFix_other: "Aplicadas {count} correcciones alternativas",
       correctionFailed: "La correccion fallo",
+      compressionFailed: "La compresion fallo. Intenta de nuevo.",
+      compressionNoChanges: "No se encontro una version mas corta.",
       clearingCache: "Borrando cache...",
       cacheClearFailed: "No se pudo borrar la cache.",
       invalidCharacterLimit: "Elige un limite de caracteres valido.",
@@ -324,7 +384,7 @@
       const isSupportHashtag = normalizeHashtagToken(hashtag) === SUPPORT_HASHTAG;
       html += escapeHtml(content.slice(lastIndex, start));
       html += isSupportHashtag
-        ? `<span class="post-hashtag post-hashtag-support" data-support-hashtag="true" role="button" tabindex="0">${escapeHtml(hashtag)}</span>`
+        ? `<span class="post-hashtag-support-wrap"><span class="post-hashtag post-hashtag-support" tabindex="0">${escapeHtml(hashtag)}</span><span class="post-hashtag-tooltip" role="tooltip">${escapeHtml(uiText("supportThreadMkMessage"))}</span></span>`
         : `<span class="post-hashtag">${escapeHtml(hashtag)}</span>`;
       lastIndex = start + hashtag.length;
       match = hashtagPattern.exec(content);
@@ -431,6 +491,10 @@
     }
 
     return tokens.join(" ");
+  }
+
+  function normalizeCompressionStrength(value) {
+    return value === "medium" || value === "heavy" ? value : "soft";
   }
 
   function escapeRegExp(value) {
@@ -833,6 +897,55 @@
       edits: combinedEdits,
       ignoredRanges,
       original,
+    };
+  }
+
+  async function compressTextContent(
+    text,
+    options = {},
+    fetchImpl = globalThis.fetch,
+  ) {
+    const sourceText = normalizeText(text || "");
+    if (!sourceText) {
+      return {
+        compressedText: "",
+        compressionStrength: normalizeCompressionStrength(options.compressionStrength),
+        sourceLanguage: options.sourceLanguage === "es" ? "es" : "en",
+      };
+    }
+
+    if (typeof fetchImpl !== "function") {
+      throw new Error(uiText("compressionFailed"));
+    }
+
+    const response = await fetchImpl("/api/compress", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sourceText,
+        sourceLanguage: options.sourceLanguage === "es" ? "es" : "en",
+        compressionStrength: normalizeCompressionStrength(options.compressionStrength),
+      }),
+    });
+
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(payload?.error || uiText("compressionFailed"));
+    }
+
+    const compressedText =
+      typeof payload?.compressedText === "string" ? normalizeText(payload.compressedText) : "";
+
+    if (!compressedText) {
+      throw new Error(uiText("compressionFailed"));
+    }
+
+    return {
+      compressedText,
+      compressionStrength: normalizeCompressionStrength(payload?.compressionStrength),
+      sourceLanguage: payload?.sourceLanguage === "es" ? "es" : "en",
     };
   }
 
@@ -1448,6 +1561,7 @@
     const customLimit = document.getElementById("custom-limit");
     const preserveLineBreaksInput = document.getElementById("preserve-line-breaks");
     const languageSelect = document.getElementById("language-select");
+    const compressionStrengthSelect = document.getElementById("compression-strength");
     const numberingInput = document.getElementById("include-numbering");
     const supportThreadMkInput = document.getElementById("support-threadmk");
     const pasteButton = document.getElementById("paste-text");
@@ -1458,10 +1572,15 @@
     const draftsMenu = document.getElementById("drafts-menu");
     const draftsMenuList = document.getElementById("drafts-menu-list");
     const themeToggle = document.getElementById("theme-toggle");
-    const correctButton = document.getElementById("spellcheck-text");
+    const largeTextToggle = document.getElementById("large-text-toggle");
     const clearCacheButton = document.getElementById("clear-cache");
     const correctionStatus = document.getElementById("correction-status");
-    const correctionStatusLabel = correctionStatus.querySelector(".editor-status-label");
+    const correctionStatusActions = document.getElementById("correction-status-actions");
+    const inlineSpellcheckButton = document.getElementById("inline-spellcheck");
+    const inlineCompressButton = document.getElementById("inline-compress");
+    const correctButton = inlineSpellcheckButton;
+    const compressButton = inlineCompressButton;
+    const correctionStatusLabel = document.getElementById("correction-status-label");
     const sourceCharCount = document.getElementById("source-char-count");
     const hashtagsInput = document.getElementById("hashtags");
     const saveHashtagsButton = document.getElementById("save-hashtags");
@@ -1475,6 +1594,14 @@
     const translateButton = document.getElementById("translate-thread");
     const translateButtonLabel = translateButton?.querySelector(".translate-action-label");
     const banner = document.getElementById("message-banner");
+    const supportPromptModal = document.getElementById("support-prompt-modal");
+    const supportPromptTitle = document.getElementById("support-prompt-title");
+    const supportPromptMessage = document.getElementById("support-prompt-message");
+    const supportPromptEnableTitle = document.getElementById("support-prompt-enable-title");
+    const supportPromptEnableInput = document.getElementById("support-prompt-enable");
+    const supportPromptKofiLabel = document.getElementById("support-prompt-kofi-label");
+    const supportPromptPaypalLabel = document.getElementById("support-prompt-paypal-label");
+    const supportPromptOkButton = document.getElementById("support-prompt-ok");
     const pageIntro = document.getElementById("page-intro");
     const pageEyebrow = document.getElementById("page-eyebrow");
     const pageHeading = document.getElementById("page-heading");
@@ -1482,10 +1609,16 @@
     const dismissIntroButton = document.getElementById("dismiss-intro");
     const platformLimitLabel = form.querySelector('label[for="platform-limit"]');
     const preserveLineBreaksTitle = form.querySelector('label[for="preserve-line-breaks"] .toggle-title');
+    const preserveLineBreaksTooltip = document.getElementById("preserve-line-breaks-tooltip");
     const languageSelectLabel = form.querySelector('label[for="language-select"]');
+    const compressionStrengthLabel = document.getElementById("compression-strength-label");
+    const compressionStrengthTooltip = document.getElementById("compression-strength-tooltip");
     const numberingTitle = form.querySelector('label[for="include-numbering"] .toggle-title');
+    const numberingTooltip = document.getElementById("number-posts-tooltip");
     const supportThreadMkTitle = form.querySelector('label[for="support-threadmk"] .toggle-title');
+    const supportThreadMkTooltip = document.getElementById("support-threadmk-tooltip");
     const themeTitle = form.querySelector('label[for="theme-toggle"] .toggle-title');
+    const largeTextTitle = form.querySelector('label[for="large-text-toggle"] .toggle-title');
     const supportTitleText = form.querySelector(".menu-support-title span");
     const menuSignoff = form.querySelector(".menu-signoff");
     const metaDescription = document.getElementById("meta-description");
@@ -1499,7 +1632,14 @@
     const platformCustomOption = platformLimit.querySelector('option[value="custom"]');
     const languageEnglishOption = languageSelect.querySelector('option[value="en"]');
     const languageSpanishOption = languageSelect.querySelector('option[value="es"]');
+    const compressionSoftOption = compressionStrengthSelect.querySelector('option[value="soft"]');
+    const compressionMediumOption = compressionStrengthSelect.querySelector('option[value="medium"]');
+    const compressionHeavyOption = compressionStrengthSelect.querySelector('option[value="heavy"]');
     let confirmModalResolver = null;
+    let saveDraftFeedbackTimeoutId = null;
+    let compressInFlight = false;
+    let supportPromptCounter = 0;
+    let supportPromptTimeoutId = null;
 
     function getSplitModeValue() {
       return preserveLineBreaksInput.checked ? "paragraph" : "compact";
@@ -1511,6 +1651,28 @@
         return storedTheme === "light" ? "light" : "dark";
       } catch (error) {
         return "dark";
+      }
+    }
+
+    function loadTextSizePreference() {
+      try {
+        const storedTextSize = window.localStorage.getItem(TEXT_SIZE_STORAGE_KEY);
+        return storedTextSize === "large" ? "large" : "normal";
+      } catch (error) {
+        return "normal";
+      }
+    }
+
+    function loadSupportPromptCounter() {
+      try {
+        const storedCounter = window.sessionStorage.getItem(SUPPORT_PROMPT_COUNTER_STORAGE_KEY);
+        const parsedCounter = Number(storedCounter);
+        if (!Number.isFinite(parsedCounter) || parsedCounter < 0) {
+          return 0;
+        }
+        return Math.floor(parsedCounter);
+      } catch (error) {
+        return 0;
       }
     }
 
@@ -1625,6 +1787,61 @@
       }
     }
 
+    function applyTextSize(textSize) {
+      const safeTextSize = textSize === "large" ? "large" : "normal";
+      document.documentElement.dataset.textSize = safeTextSize;
+
+      if (largeTextToggle) {
+        largeTextToggle.checked = safeTextSize === "large";
+      }
+
+      try {
+        window.localStorage.setItem(TEXT_SIZE_STORAGE_KEY, safeTextSize);
+      } catch (error) {
+        return;
+      }
+    }
+
+    function clearSupportPromptTimeout() {
+      if (supportPromptTimeoutId) {
+        window.clearTimeout(supportPromptTimeoutId);
+        supportPromptTimeoutId = null;
+      }
+    }
+
+    function setSupportPromptCounter(nextValue) {
+      const safeValue = supportThreadMkInput.checked
+        ? 0
+        : Math.max(0, Math.floor(Number(nextValue) || 0));
+
+      supportPromptCounter = safeValue;
+
+      try {
+        window.sessionStorage.setItem(SUPPORT_PROMPT_COUNTER_STORAGE_KEY, String(safeValue));
+      } catch (error) {
+        return;
+      }
+    }
+
+    function closeSupportPromptModal() {
+      if (supportPromptModal) {
+        supportPromptModal.hidden = true;
+      }
+    }
+
+    function showSupportPromptModal() {
+      if (!supportPromptModal) {
+        return;
+      }
+
+      if (supportPromptEnableInput) {
+        supportPromptEnableInput.checked = supportThreadMkInput.checked;
+      }
+
+      supportPromptModal.hidden = false;
+      supportPromptOkButton?.focus();
+    }
+
     function updateMenuSignoffText() {
       if (!menuSignoff) {
         return;
@@ -1662,16 +1879,53 @@
       platformLimitLabel.textContent = uiText("charactersPerPost");
       customLimit.setAttribute("aria-label", uiText("customCharacterLimit"));
       preserveLineBreaksTitle.textContent = uiText("preserveLineBreaks");
+      if (preserveLineBreaksTooltip) {
+        preserveLineBreaksTooltip.textContent = uiText("preserveLineBreaksTooltip");
+      }
       languageSelectLabel.textContent = uiText("language");
+      compressionStrengthLabel.textContent = uiText("compressionStrength");
+      if (compressionStrengthTooltip) {
+        compressionStrengthTooltip.textContent = uiText("compressionStrengthTooltip");
+      }
       numberingTitle.textContent = uiText("numberPosts");
-      supportThreadMkTitle.textContent = uiText("supportThreadMk");
+      if (numberingTooltip) {
+        numberingTooltip.textContent = uiText("numberPostsTooltip");
+      }
+      supportThreadMkTitle.innerHTML = `${escapeHtml(uiText("supportThreadMkPrefix"))} <span class="menu-threadmk-accent">${escapeHtml(SUPPORT_HASHTAG)}</span>`;
+      if (supportThreadMkTooltip) {
+        supportThreadMkTooltip.textContent = uiText("supportThreadMkTooltip");
+      }
       themeTitle.textContent = uiText("darkLight");
-      correctButton.textContent = uiText("spellcheck");
+      largeTextTitle.textContent = uiText("largerText");
+      inlineSpellcheckButton.textContent = uiText("spellcheck");
+      inlineCompressButton.textContent = uiText("compress");
       clearCacheButton.textContent = uiText("clearCache");
+      if (supportPromptTitle) {
+        supportPromptTitle.textContent = uiText("supportPromptTitle");
+      }
+      if (supportPromptMessage) {
+        supportPromptMessage.textContent = uiText("supportPromptMessage");
+      }
+      if (supportPromptEnableTitle) {
+        const safeValue = escapeHtml(uiText("supportPromptEnableTitle"));
+        supportPromptEnableTitle.innerHTML = safeValue.replace(
+          escapeHtml(SUPPORT_HASHTAG),
+          `<span class="menu-threadmk-accent">${escapeHtml(SUPPORT_HASHTAG)}</span>`,
+        );
+      }
+      if (supportPromptKofiLabel) {
+        supportPromptKofiLabel.textContent = uiText("supportPromptKofi");
+      }
+      if (supportPromptPaypalLabel) {
+        supportPromptPaypalLabel.textContent = uiText("supportPromptPaypal");
+      }
+      if (supportPromptOkButton) {
+        supportPromptOkButton.textContent = uiText("ok");
+      }
       supportTitleText.textContent = uiText("supportTitle");
       sourceInput.dataset.placeholder = uiText("enterTextHere");
       newDraftButton.textContent = uiText("newDraft");
-      saveDraftButton.textContent = uiText("saveDraft");
+      saveDraftButton.textContent = saveDraftFeedbackTimeoutId ? uiText("savedDraft") : uiText("saveDraft");
       loadDraftButton.textContent = uiText("loadDraft");
       hashtagsInput.placeholder = uiText("enterHashtagsHere");
       saveHashtagsButton.textContent = uiText("save");
@@ -1716,6 +1970,9 @@
       platformCustomOption.textContent = interfaceLanguage === "es" ? "Personalizado" : "Custom";
       languageEnglishOption.textContent = getLanguageLabel("en", { capitalize: true });
       languageSpanishOption.textContent = getLanguageLabel("es", { capitalize: true });
+      compressionSoftOption.textContent = uiText("compressSoft");
+      compressionMediumOption.textContent = uiText("compressMedium");
+      compressionHeavyOption.textContent = uiText("compressHeavy");
 
       updateMenuSignoffText();
       updateSourceCharCount();
@@ -1755,15 +2012,6 @@
 
       return new Promise((resolve) => {
         confirmModalResolver = resolve;
-      });
-    }
-
-    function showSupportThreadMkMessage() {
-      return openConfirmModal({
-        title: uiText("supportThreadMkTitle"),
-        message: uiText("supportThreadMkMessage"),
-        confirmLabel: uiText("ok"),
-        showCancel: false,
       });
     }
 
@@ -1812,6 +2060,7 @@
             platformLimit: platformLimit.value,
             customLimit: customLimit.value,
             splitMode: getSplitModeValue(),
+            compressionStrength: normalizeCompressionStrength(compressionStrengthSelect.value),
             numbering: numberingInput.checked,
             supportThreadMk: supportThreadMkInput.checked,
             activeSavedDraftId,
@@ -1838,6 +2087,10 @@
 
       if (typeof draft.splitMode === "string") {
         preserveLineBreaksInput.checked = draft.splitMode === "paragraph";
+      }
+
+      if (typeof draft.compressionStrength === "string") {
+        compressionStrengthSelect.value = normalizeCompressionStrength(draft.compressionStrength);
       }
 
       numberingInput.checked = Boolean(draft.numbering);
@@ -2225,22 +2478,33 @@
     let translateInFlight = false;
     let translateReadyForCurrentResults = false;
     let transientBannerMessage = "";
+    let transientBannerHtml = "";
 
-    function setCorrectionStatus(message) {
+    function setCorrectionStatus(message, options = {}) {
       const hasMessage = Boolean(String(message || "").trim());
+      const showActions = Boolean(options.showActions);
       correctionStatusLabel.textContent = message;
-      correctionStatus.hidden = !hasMessage;
+      correctionStatusLabel.hidden = !hasMessage;
+      correctionStatusActions.hidden = !showActions;
+      correctionStatus.hidden = !hasMessage && !showActions;
     }
 
     function syncBanner() {
       const message = transientBannerMessage;
-      if (!message) {
+      const html = transientBannerHtml;
+      if (!message && !html) {
         banner.hidden = true;
         banner.textContent = "";
+        banner.innerHTML = "";
         return;
       }
 
       banner.hidden = false;
+      if (html) {
+        banner.innerHTML = html;
+        return;
+      }
+
       banner.textContent = message;
     }
 
@@ -2375,7 +2639,7 @@
 
     function syncLanguageStatus() {
       const hasText = Boolean(normalizeText(getSourceText()));
-      setCorrectionStatus(hasText ? uiText("correctAction") : "");
+      setCorrectionStatus("", { showActions: hasText });
     }
 
     function updateSourceCharCount() {
@@ -2419,12 +2683,15 @@
       }
 
       const hasResults = !resultsList.classList.contains("empty");
-      const hasSourceText = Boolean(normalizeText(getSourceText()));
+      const normalizedSourceText = normalizeText(getSourceText());
+      const hasSourceText = Boolean(normalizedSourceText);
+      const meetsMinimumLength =
+        hasSourceText && normalizedSourceText.length >= MIN_TRANSLATION_SOURCE_CHARACTERS;
       const isVisible = hasResults && hasSourceText && translateReadyForCurrentResults;
 
       translateActions.hidden = !isVisible;
       translateButton.hidden = !isVisible;
-      translateButton.disabled = translateInFlight || !hasSourceText;
+      translateButton.disabled = translateInFlight || !meetsMinimumLength;
 
       if (!translateInFlight) {
         const targetLanguage = getOppositeLanguage();
@@ -2438,9 +2705,14 @@
     }
 
     function updateCorrectButtonState() {
-      const disabled = !normalizeText(getSourceText());
-      correctButton.disabled = disabled;
-      correctionStatus.disabled = disabled;
+      const normalizedText = normalizeText(getSourceText());
+      const disabled = !normalizedText;
+      const compressionDisabled =
+        compressInFlight || disabled || normalizedText.length < MIN_COMPRESSION_SOURCE_CHARACTERS;
+      correctButton.disabled = disabled || compressInFlight;
+      compressButton.disabled = compressionDisabled;
+      inlineSpellcheckButton.disabled = disabled || compressInFlight;
+      inlineCompressButton.disabled = compressionDisabled;
     }
 
     function getLimitValue() {
@@ -2497,6 +2769,12 @@
             if (index === posts.length - 1) {
               translateReadyForCurrentResults = true;
               markSavedDraftPosted(activeSavedDraftId);
+              if (supportThreadMkInput.checked) {
+                clearSupportPromptTimeout();
+                setSupportPromptCounter(0);
+              } else {
+                setSupportPromptCounter(supportPromptCounter + 1);
+              }
               updateTranslateButtonState();
             }
             window.setTimeout(() => {
@@ -2514,32 +2792,9 @@
       });
     }
 
-    function handleSupportHashtagActivation(event) {
-      const target = event.target.closest("[data-support-hashtag='true']");
-      if (!target || !resultsList.contains(target)) {
-        return;
-      }
-
-      event.preventDefault();
-      showSupportThreadMkMessage();
-    }
-
-    function handleSupportHashtagKeydown(event) {
-      if (event.key !== "Enter" && event.key !== " ") {
-        return;
-      }
-
-      const target = event.target.closest("[data-support-hashtag='true']");
-      if (!target || !resultsList.contains(target)) {
-        return;
-      }
-
-      event.preventDefault();
-      showSupportThreadMkMessage();
-    }
-
     function setBanner(message) {
       transientBannerMessage = String(message || "").trim();
+      transientBannerHtml = "";
       syncBanner();
     }
 
@@ -2754,8 +3009,10 @@
         return;
       }
 
-      correctionStatus.disabled = true;
       correctButton.disabled = true;
+      compressButton.disabled = true;
+      inlineSpellcheckButton.disabled = true;
+      inlineCompressButton.disabled = true;
       const button = correctButton;
       const originalLabel = button.textContent;
       button.textContent = uiText("correctingText");
@@ -2792,10 +3049,76 @@
       }
     }
 
+    async function handleCompressText() {
+      const rawText = getSourceText();
+      const normalizedSourceText = normalizeText(rawText);
+      if (
+        !normalizedSourceText ||
+        compressInFlight ||
+        normalizedSourceText.length < MIN_COMPRESSION_SOURCE_CHARACTERS
+      ) {
+        return;
+      }
+
+      if (normalizedSourceText.length > MAX_COMPRESSION_SOURCE_CHARACTERS) {
+        setBanner(
+          uiText("compressionLimitReached", {
+            count: MAX_COMPRESSION_SOURCE_CHARACTERS,
+          }),
+        );
+        return;
+      }
+
+      moreMenu.open = false;
+      compressInFlight = true;
+      correctButton.disabled = true;
+      compressButton.disabled = true;
+      inlineSpellcheckButton.disabled = true;
+      inlineCompressButton.disabled = true;
+      const originalLabel = compressButton.textContent;
+      compressButton.textContent = uiText("compressing");
+      setCorrectionStatus(uiText("compressing"));
+
+      try {
+        const result = await compressTextContent(normalizedSourceText, {
+          sourceLanguage: interfaceLanguage === "es" ? "es" : "en",
+          compressionStrength: compressionStrengthSelect.value,
+        });
+
+        setSourceText(result.compressedText);
+        render();
+        focusSourceInput();
+
+        if (result.compressedText === normalizedSourceText) {
+          setCorrectionStatus(uiText("compressionNoChanges"));
+        } else {
+          setCorrectionStatus(
+            uiText("compressedBy", {
+              count: Math.max(0, normalizedSourceText.length - result.compressedText.length),
+            }),
+          );
+        }
+      } catch (error) {
+        setCorrectionStatus(
+          typeof error?.message === "string" && error.message.trim()
+            ? error.message
+            : uiText("compressionFailed"),
+        );
+      } finally {
+        compressInFlight = false;
+        compressButton.textContent = originalLabel;
+        updateCorrectButtonState();
+      }
+    }
+
     async function handleTranslateThread() {
       const rawText = getSourceText();
       const normalizedSourceText = normalizeText(rawText);
-      if (!normalizedSourceText || translateInFlight) {
+      if (
+        !normalizedSourceText ||
+        translateInFlight ||
+        normalizedSourceText.length < MIN_TRANSLATION_SOURCE_CHARACTERS
+      ) {
         return;
       }
 
@@ -2878,6 +3201,7 @@
       try {
         try {
           window.localStorage.removeItem(THEME_STORAGE_KEY);
+          window.localStorage.removeItem(TEXT_SIZE_STORAGE_KEY);
           window.localStorage.removeItem(UI_LANGUAGE_STORAGE_KEY);
           window.localStorage.removeItem(INTRO_DISMISSED_STORAGE_KEY);
           window.localStorage.removeItem(SAVED_DRAFTS_STORAGE_KEY);
@@ -2892,6 +3216,7 @@
 
         try {
           window.sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+          window.sessionStorage.removeItem(SUPPORT_PROMPT_COUNTER_STORAGE_KEY);
         } catch (error) {
           // Ignore storage failures and continue clearing what we can.
         }
@@ -3001,6 +3326,34 @@
 
     function handleNewDraft() {
       handleClearSource();
+
+      if (supportThreadMkInput.checked || supportPromptCounter < SUPPORT_PROMPT_TRIGGER_COUNT) {
+        return;
+      }
+
+      clearSupportPromptTimeout();
+      supportPromptTimeoutId = window.setTimeout(() => {
+        supportPromptTimeoutId = null;
+
+        if (supportThreadMkInput.checked || supportPromptCounter < SUPPORT_PROMPT_TRIGGER_COUNT) {
+          return;
+        }
+
+        showSupportPromptModal();
+        setSupportPromptCounter(0);
+      }, SUPPORT_PROMPT_DELAY_MS);
+    }
+
+    function flashSaveDraftButtonLabel() {
+      if (saveDraftFeedbackTimeoutId) {
+        window.clearTimeout(saveDraftFeedbackTimeoutId);
+      }
+
+      saveDraftButton.textContent = uiText("savedDraft");
+      saveDraftFeedbackTimeoutId = window.setTimeout(() => {
+        saveDraftFeedbackTimeoutId = null;
+        saveDraftButton.textContent = uiText("saveDraft");
+      }, 1000);
     }
 
     function handleSaveDraft() {
@@ -3040,12 +3393,8 @@
 
       saveSavedDrafts(nextDrafts);
       activeSavedDraftId = nextDraft.id;
-
-      if (!draftsMenu.hidden) {
-        renderDraftMenu();
-      } else {
-        updateDraftButtonsState();
-      }
+      flashSaveDraftButtonLabel();
+      handleNewDraft();
     }
 
     function loadDraftIntoComposer(draftId) {
@@ -3187,7 +3536,8 @@
     sourceInput.addEventListener("input", handleSourceInput);
     sourceInput.addEventListener("click", handleSourceClick);
     sourceInput.addEventListener("paste", handleSourcePaste);
-    correctionStatus.addEventListener("click", handleCorrection);
+    inlineSpellcheckButton.addEventListener("click", handleCorrection);
+    inlineCompressButton.addEventListener("click", handleCompressText);
     hashtagsInput.addEventListener("input", handleHashtagsInput);
     platformLimit.addEventListener("change", render);
     customLimit.addEventListener("input", render);
@@ -3214,22 +3564,40 @@
         closeConfirmModal(false);
       }
     });
+    supportPromptOkButton.addEventListener("click", closeSupportPromptModal);
+    supportPromptModal.addEventListener("click", (event) => {
+      if (event.target === supportPromptModal) {
+        closeSupportPromptModal();
+      }
+    });
+    supportPromptEnableInput.addEventListener("change", () => {
+      supportThreadMkInput.checked = supportPromptEnableInput.checked;
+      supportThreadMkInput.dispatchEvent(new Event("change", { bubbles: true }));
+      render();
+    });
     draftsMenuList.addEventListener("click", handleDraftMenuClick);
     hashtagsMenuList.addEventListener("change", handleHashtagMenuChange);
     hashtagsMenuList.addEventListener("click", handleHashtagMenuClick);
-    resultsList.addEventListener("click", handleSupportHashtagActivation);
-    resultsList.addEventListener("keydown", handleSupportHashtagKeydown);
     moreMenu.addEventListener("toggle", syncMoreMenuState);
     if (menuBackdrop) {
       menuBackdrop.addEventListener("click", () => {
         moreMenu.open = false;
       });
     }
-    correctButton.addEventListener("click", handleCorrection);
     clearCacheButton.addEventListener("click", handleClearCache);
     themeToggle.addEventListener("change", () => {
       applyTheme(themeToggle.checked ? "light" : "dark");
       moreMenu.open = false;
+    });
+    largeTextToggle.addEventListener("change", () => {
+      applyTextSize(largeTextToggle.checked ? "large" : "normal");
+      moreMenu.open = false;
+    });
+    supportThreadMkInput.addEventListener("change", () => {
+      if (supportThreadMkInput.checked) {
+        clearSupportPromptTimeout();
+        setSupportPromptCounter(0);
+      }
     });
     if (window.PointerEvent) {
       document.addEventListener("pointerdown", closeMenuOnOutsidePress, true);
@@ -3251,6 +3619,11 @@
           return;
         }
 
+        if (supportPromptModal && !supportPromptModal.hidden) {
+          closeSupportPromptModal();
+          return;
+        }
+
         if (moreMenu.open) {
           moreMenu.open = false;
         }
@@ -3268,16 +3641,22 @@
     const initialBrowserLanguage = detectBrowserLanguage();
 
     applyTheme(loadThemePreference());
+    applyTextSize(loadTextSizePreference());
     applyIntroVisibility(loadIntroDismissedPreference());
     applyInterfaceLanguage(loadInterfaceLanguagePreference() || initialBrowserLanguage || "en");
     syncMoreMenuState();
     restoreDraftState();
+    supportPromptCounter = loadSupportPromptCounter();
+    if (supportThreadMkInput.checked) {
+      setSupportPromptCounter(0);
+    }
     render();
   }
 
   if (typeof window !== "undefined") {
     window.ThreadMK = {
       buildThread,
+      compressTextContent,
       correctTextContent,
       detectSuggestedLanguage,
       normalizeHashtags,
@@ -3293,6 +3672,7 @@
     module.exports = {
       applySimpleCorrections,
       buildThread,
+      compressTextContent,
       correctTextContent,
       detectSuggestedLanguage,
       normalizeHashtags,
