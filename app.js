@@ -1,5 +1,8 @@
 (function () {
   const THEME_STORAGE_KEY = "threadmaker_theme";
+  const COLOR_PRESET_STORAGE_KEY = "threadmaker_color_preset";
+  const DEFAULT_PALETTE = "blue-ocean";
+  const DEFAULT_COLOR_PRESET = "dark";
   const DRAFT_STORAGE_KEY = "threadmaker_draft";
   const INTRO_DISMISSED_STORAGE_KEY = "threadmaker_intro_dismissed";
   const SAVED_DRAFTS_STORAGE_KEY = "threadmaker_saved_drafts";
@@ -9,11 +12,15 @@
   const SUPPORT_PROMPT_COUNTER_STORAGE_KEY = "threadmaker_support_prompt_counter";
   const SUPPORT_HASHTAG = "#ThreadMK";
   const MAX_TRANSLATION_SOURCE_CHARACTERS = 2500;
-  const MIN_TRANSLATION_SOURCE_CHARACTERS = 100;
+  const MIN_TRANSLATION_SOURCE_CHARACTERS = 150;
   const MAX_COMPRESSION_SOURCE_CHARACTERS = 2500;
-  const MIN_COMPRESSION_SOURCE_CHARACTERS = 200;
   const SUPPORT_PROMPT_TRIGGER_COUNT = 10;
   const SUPPORT_PROMPT_DELAY_MS = 500;
+  document.documentElement.dataset.palette = document.documentElement.dataset.palette || DEFAULT_PALETTE;
+  const COLOR_PRESETS = {
+    dark: { palette: "blue-ocean", theme: "dark" },
+    light: { palette: "modaly", theme: "light" },
+  };
   const alwaysCorrectByLanguage = {
     es: new Set(["mas"]),
     en: new Set(),
@@ -64,11 +71,11 @@
       threadPrefix: "[Thread]",
       documentTitle: "Free editor and thread splitter for X (Twitter) and Bluesky",
       metaDescription:
-        "Write posts, save drafts and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish.",
+        "Write posts, save ideas and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish.",
       pageEyebrow: "Free, no account needed",
       pageHeading: "Free editor and thread splitter for X (Twitter) and Bluesky",
       pageDescription:
-        "Write posts, save drafts and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish.",
+        "Write posts, save ideas and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish.",
       charactersPerPost: "Characters per post",
       customCharacterLimit: "Custom character limit",
       longForm: "Long-form",
@@ -97,13 +104,17 @@
       supportPromptKofi: "ko-fi.com/blizky",
       supportPromptPaypal: "paypal.me/blizky",
       ok: "OK",
-      darkLight: "Dark / light",
+      theme: "Theme",
+      paletteDark: "Dark",
+      paletteLight: "Light",
       largerText: "Larger text",
       spellcheck: "Spellcheck",
       compress: "Compress",
       compressing: "Compressing...",
       compressedBy: "Shortened by {count} chars.",
       clearCache: "Clear cache",
+      clearCacheWarning:
+        "This will clear ThreadMK saved data and browser storage, including saved ideas and hashtags. Continue?",
       supportTitle: "Give if you're able",
       signoff: "Made by Alex with",
       clearText: "Clear text",
@@ -131,8 +142,8 @@
       copied: "Copied",
       copyPost: "Copy post",
       copyFailed: "Copy failed in this browser. Try selecting the text manually.",
-      translateToLanguage: "Translate to {language} (Beta)",
-      translatingToLanguage: "Translating to {language} (Beta)...",
+      translateToLanguage: "Translate to {language}",
+      translatingToLanguage: "Translating to {language}...",
       translationFailed: "Translation failed. Please try again.",
       translationLimitReached:
         "Translation currently supports up to {count} characters in the source text.",
@@ -170,11 +181,11 @@
       threadPrefix: "[Hilo]",
       documentTitle: "Editor y creador gratuito de hilos para X (Twitter) y Bluesky",
       metaDescription:
-        "Escribe publicaciones, guarda borradores y divide texto largo en publicaciones limpias desde tu navegador. Preserva saltos de linea, agrega hashtags, numera publicaciones y revisa ortografia antes de publicar.",
+        "Escribe publicaciones, guarda ideas y divide texto largo en publicaciones limpias desde tu navegador. Preserva saltos de linea, agrega hashtags, numera publicaciones y revisa ortografia antes de publicar.",
       pageEyebrow: "Gratis y sin cuenta",
       pageHeading: "Editor y creador gratuito de hilos para X (Twitter) y Bluesky",
       pageDescription:
-        "Escribe publicaciones, guarda borradores y divide texto largo en publicaciones limpias desde tu navegador. Preserva saltos de linea, agrega hashtags, numera publicaciones y revisa ortografia antes de publicar.",
+        "Escribe publicaciones, guarda ideas y divide texto largo en publicaciones limpias desde tu navegador. Preserva saltos de linea, agrega hashtags, numera publicaciones y revisa ortografia antes de publicar.",
       charactersPerPost: "Caracteres por publicacion",
       customCharacterLimit: "Limite personalizado de caracteres",
       longForm: "Texto largo",
@@ -204,13 +215,17 @@
       supportPromptKofi: "ko-fi.com/blizky",
       supportPromptPaypal: "paypal.me/blizky",
       ok: "OK",
-      darkLight: "Oscuro / claro",
+      theme: "Tema",
+      paletteDark: "Oscuro",
+      paletteLight: "Claro",
       largerText: "Texto mas grande",
       spellcheck: "Revisar ortografia",
       compress: "Comprimir",
       compressing: "Comprimiendo...",
       compressedBy: "Acortado por {count} caracteres.",
       clearCache: "Borrar cache",
+      clearCacheWarning:
+        "Esto borrara los datos guardados de ThreadMK y el almacenamiento del navegador, incluidas las ideas y los hashtags guardados. Continuar?",
       supportTitle: "Apoya si puedes",
       signoff: "Hecho por Alex con",
       clearText: "Borrar texto",
@@ -238,8 +253,8 @@
       copied: "Copiado",
       copyPost: "Copiar publicacion",
       copyFailed: "La copia fallo en este navegador. Intenta seleccionar el texto manualmente.",
-      translateToLanguage: "Traducir a {language} (Beta)",
-      translatingToLanguage: "Traduciendo a {language} (Beta)...",
+      translateToLanguage: "Traducir a {language}",
+      translatingToLanguage: "Traduciendo a {language}...",
       translationFailed: "La traduccion fallo. Intenta de nuevo.",
       translationLimitReached:
         "La traduccion actualmente admite hasta {count} caracteres en el texto de origen.",
@@ -371,8 +386,9 @@
       .replace(/'/g, "&#39;");
   }
 
-  function renderPostHtml(text) {
+  function renderPostHtml(text, options = {}) {
     const content = String(text || "");
+    const muteHashtags = Boolean(options.muteHashtags);
     let html = "";
     let lastIndex = 0;
     const hashtagPattern = /#[\p{L}\p{N}_]+/gu;
@@ -385,7 +401,7 @@
       html += escapeHtml(content.slice(lastIndex, start));
       html += isSupportHashtag
         ? `<span class="post-hashtag-support-wrap"><span class="post-hashtag post-hashtag-support" tabindex="0">${escapeHtml(hashtag)}</span><span class="post-hashtag-tooltip" role="tooltip">${escapeHtml(uiText("supportThreadMkMessage"))}</span></span>`
-        : `<span class="post-hashtag">${escapeHtml(hashtag)}</span>`;
+        : `<span class="post-hashtag${muteHashtags ? " post-hashtag-muted" : ""}">${escapeHtml(hashtag)}</span>`;
       lastIndex = start + hashtag.length;
       match = hashtagPattern.exec(content);
     }
@@ -1455,18 +1471,34 @@
     const limit = Number(options.limit);
     const numbering = Boolean(options.numbering);
     const splitMode = options.splitMode === "compact" ? "compact" : "paragraph";
+    const userHashtags = normalizeHashtags(options.hashtags || "");
     const hashtags = buildHashtagsValue(options.hashtags || "", {
       includeSupportTag: Boolean(options.supportThreadMk),
     });
     const hashtagsBlock = hashtags ? `\n\n${hashtags}` : "";
     const plainText = normalizeText(text || "");
 
-    if (!plainText) {
+    if (!plainText && !userHashtags) {
       return {
         posts: [],
         hashtags,
         totalCharacters: 0,
         warning: "",
+        splitMode,
+      };
+    }
+
+    if (!plainText) {
+      if (hashtags.length > limit) {
+        throw new Error(uiText("hashtagsFullLimit"));
+      }
+
+      return {
+        posts: [hashtags],
+        hashtags,
+        totalCharacters: hashtags.length,
+        warning: "",
+        splitMode,
       };
     }
 
@@ -1571,13 +1603,16 @@
     const loadDraftButton = document.getElementById("load-drafts");
     const draftsMenu = document.getElementById("drafts-menu");
     const draftsMenuList = document.getElementById("drafts-menu-list");
-    const themeToggle = document.getElementById("theme-toggle");
+    const paletteSelect = document.getElementById("palette-select");
     const largeTextToggle = document.getElementById("large-text-toggle");
     const clearCacheButton = document.getElementById("clear-cache");
     const correctionStatus = document.getElementById("correction-status");
     const correctionStatusActions = document.getElementById("correction-status-actions");
     const inlineSpellcheckButton = document.getElementById("inline-spellcheck");
     const inlineCompressButton = document.getElementById("inline-compress");
+    const inlineCompressSeparator = document.getElementById("inline-compress-separator");
+    const inlineTranslateButton = document.getElementById("inline-translate");
+    const inlineTranslateSeparator = document.getElementById("inline-translate-separator");
     const correctButton = inlineSpellcheckButton;
     const compressButton = inlineCompressButton;
     const correctionStatusLabel = document.getElementById("correction-status-label");
@@ -1590,9 +1625,6 @@
     const sourceInput = document.getElementById("source-text");
     const resultsList = document.getElementById("results-list");
     const template = document.getElementById("post-template");
-    const translateActions = document.getElementById("translate-actions");
-    const translateButton = document.getElementById("translate-thread");
-    const translateButtonLabel = translateButton?.querySelector(".translate-action-label");
     const banner = document.getElementById("message-banner");
     const supportPromptModal = document.getElementById("support-prompt-modal");
     const supportPromptTitle = document.getElementById("support-prompt-title");
@@ -1617,7 +1649,7 @@
     const numberingTooltip = document.getElementById("number-posts-tooltip");
     const supportThreadMkTitle = form.querySelector('label[for="support-threadmk"] .toggle-title');
     const supportThreadMkTooltip = document.getElementById("support-threadmk-tooltip");
-    const themeTitle = form.querySelector('label[for="theme-toggle"] .toggle-title');
+    const paletteSelectLabel = form.querySelector('label[for="palette-select"]');
     const largeTextTitle = form.querySelector('label[for="large-text-toggle"] .toggle-title');
     const supportTitleText = form.querySelector(".menu-support-title span");
     const menuSignoff = form.querySelector(".menu-signoff");
@@ -1632,6 +1664,8 @@
     const platformCustomOption = platformLimit.querySelector('option[value="custom"]');
     const languageEnglishOption = languageSelect.querySelector('option[value="en"]');
     const languageSpanishOption = languageSelect.querySelector('option[value="es"]');
+    const paletteDarkOption = paletteSelect.querySelector('option[value="dark"]');
+    const paletteLightOption = paletteSelect.querySelector('option[value="light"]');
     const compressionSoftOption = compressionStrengthSelect.querySelector('option[value="soft"]');
     const compressionMediumOption = compressionStrengthSelect.querySelector('option[value="medium"]');
     const compressionHeavyOption = compressionStrengthSelect.querySelector('option[value="heavy"]');
@@ -1645,12 +1679,29 @@
       return preserveLineBreaksInput.checked ? "paragraph" : "compact";
     }
 
-    function loadThemePreference() {
+    function loadColorPresetPreference() {
       try {
+        const storedPreset = window.localStorage.getItem(COLOR_PRESET_STORAGE_KEY);
+        if (storedPreset === "blue-ocean") {
+          return "dark";
+        }
+
+        if (storedPreset && Object.prototype.hasOwnProperty.call(COLOR_PRESETS, storedPreset)) {
+          return storedPreset;
+        }
+
         const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-        return storedTheme === "light" ? "light" : "dark";
+        if (storedTheme === "light") {
+          return "light";
+        }
+
+        if (storedTheme === "dark") {
+          return "dark";
+        }
+
+        return DEFAULT_COLOR_PRESET;
       } catch (error) {
-        return "dark";
+        return DEFAULT_COLOR_PRESET;
       }
     }
 
@@ -1768,22 +1819,40 @@
       return null;
     }
 
-    function applyTheme(theme) {
-      const safeTheme = theme === "light" ? "light" : "dark";
-      document.documentElement.dataset.theme = safeTheme;
+    function applyColorPreset(preset) {
+      const safePreset = Object.prototype.hasOwnProperty.call(COLOR_PRESETS, preset)
+        ? preset
+        : DEFAULT_COLOR_PRESET;
+      const nextPreset = COLOR_PRESETS[safePreset];
+      document.documentElement.dataset.palette = nextPreset.palette;
+      document.documentElement.dataset.theme = nextPreset.theme;
 
-      if (themeColorMeta) {
-        themeColorMeta.setAttribute("content", safeTheme === "light" ? "#f6f8fa" : "#2f353a");
-      }
+      syncThemeColorMeta();
 
-      if (themeToggle) {
-        themeToggle.checked = safeTheme === "light";
+      if (paletteSelect) {
+        paletteSelect.value = safePreset;
       }
 
       try {
-        window.localStorage.setItem(THEME_STORAGE_KEY, safeTheme);
+        window.localStorage.setItem(COLOR_PRESET_STORAGE_KEY, safePreset);
+        window.localStorage.setItem(THEME_STORAGE_KEY, nextPreset.theme);
       } catch (error) {
         return;
+      }
+    }
+
+    function syncThemeColorMeta() {
+      if (!themeColorMeta) {
+        return;
+      }
+
+      const themeColor = window
+        .getComputedStyle(document.documentElement)
+        .getPropertyValue("--theme-color")
+        .trim();
+
+      if (themeColor) {
+        themeColorMeta.setAttribute("content", themeColor);
       }
     }
 
@@ -1895,7 +1964,7 @@
       if (supportThreadMkTooltip) {
         supportThreadMkTooltip.textContent = uiText("supportThreadMkTooltip");
       }
-      themeTitle.textContent = uiText("darkLight");
+      paletteSelectLabel.textContent = uiText("theme");
       largeTextTitle.textContent = uiText("largerText");
       inlineSpellcheckButton.textContent = uiText("spellcheck");
       inlineCompressButton.textContent = uiText("compress");
@@ -1970,6 +2039,8 @@
       platformCustomOption.textContent = interfaceLanguage === "es" ? "Personalizado" : "Custom";
       languageEnglishOption.textContent = getLanguageLabel("en", { capitalize: true });
       languageSpanishOption.textContent = getLanguageLabel("es", { capitalize: true });
+      paletteDarkOption.textContent = uiText("paletteDark");
+      paletteLightOption.textContent = uiText("paletteLight");
       compressionSoftOption.textContent = uiText("compressSoft");
       compressionMediumOption.textContent = uiText("compressMedium");
       compressionHeavyOption.textContent = uiText("compressHeavy");
@@ -2476,17 +2547,14 @@
 
     let sourceMarkupActive = false;
     let translateInFlight = false;
-    let translateReadyForCurrentResults = false;
     let transientBannerMessage = "";
     let transientBannerHtml = "";
 
     function setCorrectionStatus(message, options = {}) {
       const hasMessage = Boolean(String(message || "").trim());
-      const showActions = Boolean(options.showActions);
       correctionStatusLabel.textContent = message;
       correctionStatusLabel.hidden = !hasMessage;
-      correctionStatusActions.hidden = !showActions;
-      correctionStatus.hidden = !hasMessage && !showActions;
+      correctionStatus.hidden = !hasMessage;
     }
 
     function syncBanner() {
@@ -2639,7 +2707,8 @@
 
     function syncLanguageStatus() {
       const hasText = Boolean(normalizeText(getSourceText()));
-      setCorrectionStatus("", { showActions: hasText });
+      setCorrectionStatus("");
+      correctionStatusActions.hidden = !hasText;
     }
 
     function updateSourceCharCount() {
@@ -2677,42 +2746,59 @@
       });
     }
 
-    function updateTranslateButtonState() {
-      if (!translateActions || !translateButton) {
+    function getGeneratedPostCount() {
+      return resultsList.querySelectorAll(".post-card").length;
+    }
+
+    function syncInlineActionSeparators() {
+      if (!inlineCompressSeparator || !inlineCompressButton || !inlineTranslateSeparator || !inlineTranslateButton) {
         return;
       }
 
-      const hasResults = !resultsList.classList.contains("empty");
+      const showCompress = !inlineCompressButton.hidden;
+      const showTranslate = !inlineTranslateButton.hidden;
+
+      inlineCompressSeparator.hidden = !showCompress && !showTranslate;
+      inlineTranslateSeparator.hidden = !showCompress || !showTranslate;
+    }
+
+    function updateTranslateButtonState() {
+      if (!inlineTranslateButton || !inlineTranslateSeparator) {
+        return;
+      }
+
+      const hasResults = getGeneratedPostCount() > 0;
       const normalizedSourceText = normalizeText(getSourceText());
       const hasSourceText = Boolean(normalizedSourceText);
       const meetsMinimumLength =
         hasSourceText && normalizedSourceText.length >= MIN_TRANSLATION_SOURCE_CHARACTERS;
-      const isVisible = hasResults && hasSourceText && translateReadyForCurrentResults;
+      const isVisible = hasResults && meetsMinimumLength;
 
-      translateActions.hidden = !isVisible;
-      translateButton.hidden = !isVisible;
-      translateButton.disabled = translateInFlight || !meetsMinimumLength;
+      inlineTranslateSeparator.hidden = !isVisible;
+      inlineTranslateButton.hidden = !isVisible;
+      inlineTranslateButton.disabled = translateInFlight;
 
       if (!translateInFlight) {
         const targetLanguage = getOppositeLanguage();
-        const label = getTranslateButtonLabel(targetLanguage);
-        if (translateButtonLabel) {
-          translateButtonLabel.textContent = label;
-        }
-        translateButton.setAttribute("aria-label", label);
-        translateButton.setAttribute("title", label);
+        const buttonLabel = getTranslateButtonLabel(targetLanguage);
+        inlineTranslateButton.textContent = buttonLabel;
+        inlineTranslateButton.setAttribute("aria-label", buttonLabel);
       }
+
+      syncInlineActionSeparators();
     }
 
     function updateCorrectButtonState() {
       const normalizedText = normalizeText(getSourceText());
       const disabled = !normalizedText;
-      const compressionDisabled =
-        compressInFlight || disabled || normalizedText.length < MIN_COMPRESSION_SOURCE_CHARACTERS;
+      const compressionEligible = getGeneratedPostCount() > 1;
+      const compressionDisabled = compressInFlight || disabled || !compressionEligible;
       correctButton.disabled = disabled || compressInFlight;
       compressButton.disabled = compressionDisabled;
       inlineSpellcheckButton.disabled = disabled || compressInFlight;
       inlineCompressButton.disabled = compressionDisabled;
+      inlineCompressButton.hidden = !compressionEligible;
+      syncInlineActionSeparators();
     }
 
     function getLimitValue() {
@@ -2722,13 +2808,11 @@
     }
 
     function renderEmpty() {
-      translateReadyForCurrentResults = false;
       resultsList.classList.add("empty");
       resultsList.innerHTML = '<div class="empty-state"></div>';
     }
 
     function renderPosts(posts) {
-      translateReadyForCurrentResults = false;
       resultsList.classList.remove("empty");
       resultsList.innerHTML = "";
       const copyButtons = [];
@@ -2741,13 +2825,14 @@
         const copyButton = fragment.querySelector(".copy-button");
         const copyButtonLabel = fragment.querySelector(".panel-button-label");
         const postCharCount = fragment.querySelector(".post-char-count");
-
         postLabel.textContent = uiText("postLabel", {
           index: index + 1,
           total: posts.length,
         });
         postCharCount.textContent = uiText("charCount", { count: post.length });
-        postBody.innerHTML = renderPostHtml(post);
+        postBody.innerHTML = renderPostHtml(post, {
+          muteHashtags: index === posts.length - 1,
+        });
         copyButton.dataset.value = post;
         copyButtonLabel.textContent = uiText("copy");
         copyButton.setAttribute("aria-label", uiText("copyPost"));
@@ -2767,7 +2852,6 @@
               copyButtons[index + 1].disabled = false;
             }
             if (index === posts.length - 1) {
-              translateReadyForCurrentResults = true;
               markSavedDraftPosted(activeSavedDraftId);
               if (supportThreadMkInput.checked) {
                 clearSupportPromptTimeout();
@@ -2891,12 +2975,13 @@
 
         const rawText = getSourceText();
         const limit = getLimitValue();
+        const userHashtags = normalizeHashtags(hashtagsInput.value);
         updateCorrectButtonState();
         updateSourceCharCount();
         updateHashtagButtonsState();
         updateDraftButtonsState();
 
-        if (!normalizeText(rawText)) {
+        if (!normalizeText(rawText) && !userHashtags) {
           syncLanguageStatus();
           setBanner("");
           renderEmpty();
@@ -2919,6 +3004,7 @@
         renderEmpty();
         setBanner(error.message);
       } finally {
+        updateCorrectButtonState();
         updateTranslateButtonState();
         saveDraftState();
       }
@@ -3055,7 +3141,7 @@
       if (
         !normalizedSourceText ||
         compressInFlight ||
-        normalizedSourceText.length < MIN_COMPRESSION_SOURCE_CHARACTERS
+        getGeneratedPostCount() < 2
       ) {
         return;
       }
@@ -3112,6 +3198,10 @@
     }
 
     async function handleTranslateThread() {
+      if (!inlineTranslateButton) {
+        return;
+      }
+
       const rawText = getSourceText();
       const normalizedSourceText = normalizeText(rawText);
       if (
@@ -3137,12 +3227,9 @@
       const loadingLabel = getTranslatingButtonLabel(targetLanguage);
 
       translateInFlight = true;
-      translateButton.disabled = true;
-      if (translateButtonLabel) {
-        translateButtonLabel.textContent = loadingLabel;
-      }
-      translateButton.setAttribute("aria-label", loadingLabel);
-      translateButton.setAttribute("title", loadingLabel);
+      inlineTranslateButton.disabled = true;
+      inlineTranslateButton.textContent = loadingLabel;
+      inlineTranslateButton.setAttribute("aria-label", loadingLabel);
       setBanner("");
 
       try {
@@ -3184,16 +3271,24 @@
         );
       } finally {
         translateInFlight = false;
-        if (translateButtonLabel) {
-          translateButtonLabel.textContent = originalLabel;
-        }
-        translateButton.setAttribute("aria-label", originalLabel);
-        translateButton.setAttribute("title", originalLabel);
+        inlineTranslateButton.textContent = originalLabel;
+        inlineTranslateButton.setAttribute("aria-label", originalLabel);
         updateTranslateButtonState();
       }
     }
 
     async function handleClearCache() {
+      const confirmed = await openConfirmModal({
+        title: uiText("clearCache"),
+        message: uiText("clearCacheWarning"),
+        cancelLabel: uiText("cancel"),
+        confirmLabel: uiText("clearCache"),
+      });
+
+      if (!confirmed) {
+        return;
+      }
+
       const originalLabel = clearCacheButton.textContent;
       clearCacheButton.disabled = true;
       clearCacheButton.textContent = uiText("clearingCache");
@@ -3201,6 +3296,7 @@
       try {
         try {
           window.localStorage.removeItem(THEME_STORAGE_KEY);
+          window.localStorage.removeItem(COLOR_PRESET_STORAGE_KEY);
           window.localStorage.removeItem(TEXT_SIZE_STORAGE_KEY);
           window.localStorage.removeItem(UI_LANGUAGE_STORAGE_KEY);
           window.localStorage.removeItem(INTRO_DISMISSED_STORAGE_KEY);
@@ -3538,6 +3634,7 @@
     sourceInput.addEventListener("paste", handleSourcePaste);
     inlineSpellcheckButton.addEventListener("click", handleCorrection);
     inlineCompressButton.addEventListener("click", handleCompressText);
+    inlineTranslateButton.addEventListener("click", handleTranslateThread);
     hashtagsInput.addEventListener("input", handleHashtagsInput);
     platformLimit.addEventListener("change", render);
     customLimit.addEventListener("input", render);
@@ -3556,7 +3653,6 @@
     loadDraftButton.addEventListener("click", handleLoadDraftsClick);
     saveHashtagsButton.addEventListener("click", handleSaveHashtags);
     loadHashtagsButton.addEventListener("click", handleLoadHashtagsClick);
-    translateButton.addEventListener("click", handleTranslateThread);
     confirmModalCancelButton.addEventListener("click", () => closeConfirmModal(false));
     confirmModalConfirmButton.addEventListener("click", () => closeConfirmModal(true));
     confirmModal.addEventListener("click", (event) => {
@@ -3585,8 +3681,8 @@
       });
     }
     clearCacheButton.addEventListener("click", handleClearCache);
-    themeToggle.addEventListener("change", () => {
-      applyTheme(themeToggle.checked ? "light" : "dark");
+    paletteSelect.addEventListener("change", () => {
+      applyColorPreset(paletteSelect.value);
       moreMenu.open = false;
     });
     largeTextToggle.addEventListener("change", () => {
@@ -3640,7 +3736,7 @@
 
     const initialBrowserLanguage = detectBrowserLanguage();
 
-    applyTheme(loadThemePreference());
+    applyColorPreset(loadColorPresetPreference());
     applyTextSize(loadTextSizePreference());
     applyIntroVisibility(loadIntroDismissedPreference());
     applyInterfaceLanguage(loadInterfaceLanguagePreference() || initialBrowserLanguage || "en");

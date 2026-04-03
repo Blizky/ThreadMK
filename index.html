@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" data-palette="blue-ocean">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,7 +7,7 @@
     <meta
       id="meta-description"
       name="description"
-      content="Write posts, save drafts and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish."
+      content="Write posts, save ideas and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish."
     />
     <meta
       name="robots"
@@ -15,7 +15,7 @@
     />
     <meta name="author" content="Alex Blizky" />
     <meta name="application-name" content="ThreadMK" />
-    <meta id="theme-color-meta" name="theme-color" content="#2f353a" />
+    <meta id="theme-color-meta" name="theme-color" content="" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="ThreadMK" />
     <meta
@@ -26,7 +26,7 @@
     <meta
       id="og-description"
       property="og:description"
-      content="Write posts, save drafts and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish."
+      content="Write posts, save ideas and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish."
     />
     <meta id="og-locale" property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary" />
@@ -38,7 +38,7 @@
     <meta
       id="twitter-description"
       name="twitter:description"
-      content="Write posts, save drafts and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish."
+      content="Write posts, save ideas and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish."
     />
     <script type="application/ld+json">
       {
@@ -48,7 +48,7 @@
         "applicationCategory": "UtilitiesApplication",
         "operatingSystem": "Any",
         "browserRequirements": "Requires JavaScript and a modern web browser.",
-        "description": "Write posts, save drafts and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish.",
+        "description": "Write posts, save ideas and split long text into clean posts in your browser. Preserve line breaks, add hashtags, number posts, and spellcheck before you publish.",
         "inLanguage": ["en", "es"],
         "isAccessibleForFree": true,
         "offers": {
@@ -68,6 +68,8 @@
         ]
       }
     </script>
+    <link rel="stylesheet" href="./palettes/modaly.css" />
+    <link rel="stylesheet" href="./palettes/blue-ocean.css" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -104,15 +106,13 @@
               </select>
             </div>
 
-            <label class="toggle-row" for="theme-toggle">
-              <div>
-                <span class="toggle-title">Dark / light</span>
-              </div>
-              <span class="toggle-control">
-                <input id="theme-toggle" name="theme-toggle" type="checkbox" />
-                <span class="toggle-icon" aria-hidden="true"></span>
-              </span>
-            </label>
+            <div class="field-group menu-inline-field">
+              <label for="palette-select">Theme</label>
+              <select id="palette-select" name="palette-select" class="menu-compact-control">
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+              </select>
+            </div>
 
             <label class="toggle-row" for="large-text-toggle">
               <div>
@@ -362,7 +362,7 @@
         <p class="page-eyebrow" id="page-eyebrow">Free, no account needed</p>
         <h1 class="page-title" id="page-heading">Free editor and thread splitter for X (Twitter) and Bluesky</h1>
         <p class="page-description" id="page-description">
-          Write posts, save drafts and split long text into clean posts in your browser. Preserve
+          Write posts, save ideas and split long text into clean posts in your browser. Preserve
           line breaks, add hashtags, number posts, and spellcheck before you publish.
         </p>
       </section>
@@ -400,14 +400,16 @@
               data-placeholder="Enter text here..."
             ></div>
           </div>
+          <div class="composer-notice" id="correction-status" hidden>
+            <span class="composer-notice-label" id="correction-status-label" hidden></span>
+          </div>
           <div class="panel-header">
-            <div class="editor-status" id="correction-status" hidden>
-              <div class="editor-status-actions" id="correction-status-actions">
-                <button class="editor-status-action" id="inline-spellcheck" type="button">Spellcheck</button>
-                <span class="editor-status-separator" aria-hidden="true">|</span>
-                <button class="editor-status-action" id="inline-compress" type="button">Compress</button>
-              </div>
-              <span class="editor-status-label" id="correction-status-label" hidden></span>
+            <div class="editor-status-actions" id="correction-status-actions">
+              <button class="editor-status-action" id="inline-spellcheck" type="button">Spellcheck</button>
+              <span class="editor-status-separator" id="inline-compress-separator" aria-hidden="true" hidden>|</span>
+              <button class="editor-status-action" id="inline-compress" type="button" hidden>Compress</button>
+              <span class="editor-status-separator" id="inline-translate-separator" aria-hidden="true" hidden>|</span>
+              <button class="editor-status-action" id="inline-translate" type="button" hidden>Translate to Spanish</button>
             </div>
             <div class="panel-actions">
               <p class="source-char-count" id="source-char-count">0 chars</p>
@@ -461,26 +463,6 @@
       <section class="results-section">
         <div class="results-list empty" id="results-list">
           <div class="empty-state"></div>
-        </div>
-        <div class="translate-actions" id="translate-actions" hidden>
-          <button
-            id="translate-thread"
-            class="translate-action-button"
-            type="button"
-            hidden
-            aria-label="Translate to Spanish"
-            title="Translate to Spanish"
-          >
-            <img
-              class="icon-img translate-action-icon"
-              src="./assets/icons/world_2_line.svg"
-              alt=""
-              width="24"
-              height="24"
-              aria-hidden="true"
-            />
-            <span class="translate-action-label">Translate to Spanish</span>
-          </button>
         </div>
       </section>
     </main>
