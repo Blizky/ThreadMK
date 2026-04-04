@@ -11,12 +11,29 @@
   const TEXT_SIZE_STORAGE_KEY = "threadmaker_text_size";
   const SUPPORT_PROMPT_COUNTER_STORAGE_KEY = "threadmaker_support_prompt_counter";
   const SUPPORT_HASHTAG = "#ThreadMK";
-  const MAX_TRANSLATION_SOURCE_CHARACTERS = 2500;
-  const MIN_TRANSLATION_SOURCE_CHARACTERS = 150;
-  const MAX_COMPRESSION_SOURCE_CHARACTERS = 2500;
   const SUPPORT_PROMPT_TRIGGER_COUNT = 10;
   const SUPPORT_PROMPT_DELAY_MS = 500;
-  document.documentElement.dataset.palette = document.documentElement.dataset.palette || DEFAULT_PALETTE;
+  const PLATFORM_PRESETS = {
+    x: {
+      limit: 280,
+      iconFill: "./assets/icons/social_x_fill.svg",
+      iconLine: "./assets/icons/social_x_line.svg",
+    },
+    bluesky: {
+      limit: 300,
+      iconFill: "./assets/icons/bluesky_social_fill.svg",
+      iconLine: "./assets/icons/bluesky_social_line.svg",
+    },
+    mastodon: {
+      limit: 500,
+      iconFill: "./assets/icons/mastodon_fill.svg",
+      iconLine: "./assets/icons/mastodon_line.svg",
+    },
+  };
+  if (typeof document !== "undefined") {
+    document.documentElement.dataset.palette =
+      document.documentElement.dataset.palette || DEFAULT_PALETTE;
+  }
   const COLOR_PRESETS = {
     dark: { palette: "blue-ocean", theme: "dark" },
     light: { palette: "modaly", theme: "light" },
@@ -79,6 +96,9 @@
       charactersPerPost: "Characters per post",
       customCharacterLimit: "Custom character limit",
       longForm: "Long-form",
+      platformX: "X",
+      platformBluesky: "Bluesky",
+      platformMastodon: "Mastodon",
       preserveLineBreaks: "Preserve line breaks",
       preserveLineBreaksTooltip:
         "Keeps your line and paragraph breaks when splitting text into posts.",
@@ -89,17 +109,11 @@
       supportThreadMkPrefix: "Support",
       supportThreadMkTooltip:
         "Adds #ThreadMK to the end of the hashtag list on generated posts.",
-      compressionStrength: "Compression",
-      compressionStrengthTooltip:
-        "AI function that shortens your text while keeping the main idea. Soft makes light changes, Medium rewrites a bit more, and Heavy edits more aggressively.",
-      compressSoft: "Soft",
-      compressMedium: "Medium",
-      compressHeavy: "Heavy",
       supportThreadMkMessage:
         "Support ThreadMK sharing this hashtag. You can disable it from Settings.",
       supportPromptTitle: "Give if you're able",
       supportPromptMessage:
-        "Help keep ThreadMK free and awesome. Your support helps cover AI and hosting costs. If it saves you time, consider backing it.",
+        "Help keep ThreadMK free and awesome. Your support helps cover hosting and development costs. If it saves you time, consider backing it.",
       supportPromptEnableTitle: "Enable #ThreadMK",
       supportPromptKofi: "ko-fi.com/blizky",
       supportPromptPaypal: "paypal.me/blizky",
@@ -109,9 +123,6 @@
       paletteLight: "Light",
       largerText: "Larger text",
       spellcheck: "Spellcheck",
-      compress: "Compress",
-      compressing: "Compressing...",
-      compressedBy: "Shortened by {count} chars.",
       clearCache: "Clear cache",
       clearCacheWarning:
         "This will clear ThreadMK saved data and browser storage, including saved ideas and hashtags. Continue?",
@@ -119,7 +130,7 @@
       signoff: "Made by Alex with",
       clearText: "Clear text",
       enterTextHere: "Enter text here...",
-      charCount: "{count} chars",
+      charCount: "{count}",
       paste: "Paste",
       pasting: "Pasting...",
       pasted: "Pasted",
@@ -142,13 +153,6 @@
       copied: "Copied",
       copyPost: "Copy post",
       copyFailed: "Copy failed in this browser. Try selecting the text manually.",
-      translateToLanguage: "Translate to {language}",
-      translatingToLanguage: "Translating to {language}...",
-      translationFailed: "Translation failed. Please try again.",
-      translationLimitReached:
-        "Translation currently supports up to {count} characters in the source text.",
-      compressionLimitReached:
-        "Compression currently supports up to {count} characters in the source text.",
       spellcheckMismatchGeneric:
         "It seems that this text is not {language}. Currently spellchecking only works for English and Spanish.",
       spellcheckSwitchSpanish:
@@ -168,8 +172,6 @@
       fallbackFix_one: "Applied {count} fallback fix",
       fallbackFix_other: "Applied {count} fallback fixes",
       correctionFailed: "Correction failed",
-      compressionFailed: "Compression failed. Please try again.",
-      compressionNoChanges: "No shorter version found.",
       clearingCache: "Clearing cache...",
       cacheClearFailed: "Cache clear failed.",
       invalidCharacterLimit: "Please choose a valid character limit.",
@@ -189,6 +191,9 @@
       charactersPerPost: "Caracteres por publicacion",
       customCharacterLimit: "Limite personalizado de caracteres",
       longForm: "Texto largo",
+      platformX: "X",
+      platformBluesky: "Bluesky",
+      platformMastodon: "Mastodon",
       preserveLineBreaks: "Preservar saltos de linea",
       preserveLineBreaksTooltip:
         "Mantiene tus saltos de linea y parrafos al dividir el texto en publicaciones.",
@@ -200,17 +205,11 @@
       supportThreadMkPrefix: "Apoyar",
       supportThreadMkTooltip:
         "Agrega #ThreadMK al final de la lista de hashtags en las publicaciones generadas.",
-      compressionStrength: "Compresion",
-      compressionStrengthTooltip:
-        "Funcion de IA que acorta tu texto manteniendo la idea principal. Suave hace cambios leves, Medio reescribe un poco mas y Fuerte edita con mas agresividad.",
-      compressSoft: "Suave",
-      compressMedium: "Media",
-      compressHeavy: "Fuerte",
       supportThreadMkMessage:
         "Apoya a ThreadMK compartiendo este hashtag. Puedes desactivarlo desde Ajustes.",
       supportPromptTitle: "Apoya si puedes",
       supportPromptMessage:
-        "Ayuda a mantener ThreadMK gratis y genial. Tu apoyo ayuda a cubrir los costos de IA y alojamiento. Si te ahorra tiempo, considera apoyarlo.",
+        "Ayuda a mantener ThreadMK gratis y genial. Tu apoyo ayuda a cubrir los costos de alojamiento y desarrollo. Si te ahorra tiempo, considera apoyarlo.",
       supportPromptEnableTitle: "Activar #ThreadMK",
       supportPromptKofi: "ko-fi.com/blizky",
       supportPromptPaypal: "paypal.me/blizky",
@@ -220,9 +219,6 @@
       paletteLight: "Claro",
       largerText: "Texto mas grande",
       spellcheck: "Revisar ortografia",
-      compress: "Comprimir",
-      compressing: "Comprimiendo...",
-      compressedBy: "Acortado por {count} caracteres.",
       clearCache: "Borrar cache",
       clearCacheWarning:
         "Esto borrara los datos guardados de ThreadMK y el almacenamiento del navegador, incluidas las ideas y los hashtags guardados. Continuar?",
@@ -230,7 +226,7 @@
       signoff: "Hecho por Alex con",
       clearText: "Borrar texto",
       enterTextHere: "Escribe el texto aqui...",
-      charCount: "{count} caracteres",
+      charCount: "{count}",
       paste: "Pegar",
       pasting: "Pegando...",
       pasted: "Pegado",
@@ -253,13 +249,6 @@
       copied: "Copiado",
       copyPost: "Copiar publicacion",
       copyFailed: "La copia fallo en este navegador. Intenta seleccionar el texto manualmente.",
-      translateToLanguage: "Traducir a {language}",
-      translatingToLanguage: "Traduciendo a {language}...",
-      translationFailed: "La traduccion fallo. Intenta de nuevo.",
-      translationLimitReached:
-        "La traduccion actualmente admite hasta {count} caracteres en el texto de origen.",
-      compressionLimitReached:
-        "La compresion actualmente admite hasta {count} caracteres en el texto de origen.",
       spellcheckMismatchGeneric:
         "Parece que este texto no esta en {language}. Actualmente la revision ortografica solo funciona para ingles y espanol.",
       spellcheckSwitchSpanish:
@@ -279,8 +268,6 @@
       fallbackFix_one: "Aplicada {count} correccion alternativa",
       fallbackFix_other: "Aplicadas {count} correcciones alternativas",
       correctionFailed: "La correccion fallo",
-      compressionFailed: "La compresion fallo. Intenta de nuevo.",
-      compressionNoChanges: "No se encontro una version mas corta.",
       clearingCache: "Borrando cache...",
       cacheClearFailed: "No se pudo borrar la cache.",
       invalidCharacterLimit: "Elige un limite de caracteres valido.",
@@ -292,7 +279,6 @@
 
   const ignoredCorrections = new Set();
 
-  let selectedLanguage = "en";
   let interfaceLanguage = "en";
 
   function uiText(key, replacements = {}, locale = interfaceLanguage) {
@@ -324,10 +310,6 @@
     return uiText(`${key}_${count === 1 ? "one" : "other"}`, { count }, locale);
   }
 
-  function getOppositeLanguage(language = interfaceLanguage) {
-    return language === "es" ? "en" : "es";
-  }
-
   function normalizeText(value) {
     return String(value || "")
       .replace(/\r\n?/g, "\n")
@@ -335,12 +317,12 @@
       .trim();
   }
 
-  function getThreadPrefix(language = selectedLanguage) {
+  function getThreadPrefix(language = interfaceLanguage) {
     const safeLanguage = language === "es" ? "es" : "en";
     return `${uiText("threadPrefix", {}, safeLanguage)} `;
   }
 
-  function prependThreadPrefix(text, language = selectedLanguage) {
+  function prependThreadPrefix(text, language = interfaceLanguage) {
     const normalized = normalizeText(text || "");
 
     if (!normalized) {
@@ -358,22 +340,22 @@
     return String(word || "").trim().toLowerCase();
   }
 
-  function getIgnoredCorrectionKey(word, language = selectedLanguage) {
+  function getIgnoredCorrectionKey(word, language = interfaceLanguage) {
     return `${language === "es" ? "es" : "en"}:${normalizeWord(word)}`;
   }
 
-  function isIgnoredCorrection(word, language = selectedLanguage) {
+  function isIgnoredCorrection(word, language = interfaceLanguage) {
     return ignoredCorrections.has(getIgnoredCorrectionKey(word, language));
   }
 
-  function addIgnoredCorrection(word, language = selectedLanguage) {
+  function addIgnoredCorrection(word, language = interfaceLanguage) {
     const key = getIgnoredCorrectionKey(word, language);
     if (!key.endsWith(":")) {
       ignoredCorrections.add(key);
     }
   }
 
-  function removeIgnoredCorrection(word, language = selectedLanguage) {
+  function removeIgnoredCorrection(word, language = interfaceLanguage) {
     ignoredCorrections.delete(getIgnoredCorrectionKey(word, language));
   }
 
@@ -509,10 +491,6 @@
     return tokens.join(" ");
   }
 
-  function normalizeCompressionStrength(value) {
-    return value === "medium" || value === "heavy" ? value : "soft";
-  }
-
   function escapeRegExp(value) {
     return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
@@ -586,7 +564,7 @@
     return corrected;
   }
 
-  function applySimpleCorrections(text, language = selectedLanguage) {
+  function applySimpleCorrections(text, language = interfaceLanguage) {
     const simpleCorrections =
       simpleCorrectionsByLanguage[language] || simpleCorrectionsByLanguage.en;
     const alwaysCorrect = alwaysCorrectByLanguage[language] || alwaysCorrectByLanguage.en;
@@ -642,7 +620,7 @@
       return true;
     }
 
-    if (isIgnoredCorrection(original)) {
+    if (isIgnoredCorrection(original, language)) {
       return true;
     }
 
@@ -677,7 +655,7 @@
     return { ignoredRanges, edits };
   }
 
-  function findForcedEdits(text, language = selectedLanguage) {
+  function findForcedEdits(text, language = interfaceLanguage) {
     if (language !== "es") {
       return [];
     }
@@ -853,7 +831,7 @@
     }
   }
 
-  async function correctTextContent(text, language = selectedLanguage, fetchImpl = globalThis.fetch) {
+  async function correctTextContent(text, language = interfaceLanguage, fetchImpl = globalThis.fetch) {
     const original = String(text || "");
     if (!original.trim()) {
       return {
@@ -913,55 +891,6 @@
       edits: combinedEdits,
       ignoredRanges,
       original,
-    };
-  }
-
-  async function compressTextContent(
-    text,
-    options = {},
-    fetchImpl = globalThis.fetch,
-  ) {
-    const sourceText = normalizeText(text || "");
-    if (!sourceText) {
-      return {
-        compressedText: "",
-        compressionStrength: normalizeCompressionStrength(options.compressionStrength),
-        sourceLanguage: options.sourceLanguage === "es" ? "es" : "en",
-      };
-    }
-
-    if (typeof fetchImpl !== "function") {
-      throw new Error(uiText("compressionFailed"));
-    }
-
-    const response = await fetchImpl("/api/compress", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        sourceText,
-        sourceLanguage: options.sourceLanguage === "es" ? "es" : "en",
-        compressionStrength: normalizeCompressionStrength(options.compressionStrength),
-      }),
-    });
-
-    const payload = await response.json().catch(() => null);
-    if (!response.ok) {
-      throw new Error(payload?.error || uiText("compressionFailed"));
-    }
-
-    const compressedText =
-      typeof payload?.compressedText === "string" ? normalizeText(payload.compressedText) : "";
-
-    if (!compressedText) {
-      throw new Error(uiText("compressionFailed"));
-    }
-
-    return {
-      compressedText,
-      compressionStrength: normalizeCompressionStrength(payload?.compressionStrength),
-      sourceLanguage: payload?.sourceLanguage === "es" ? "es" : "en",
     };
   }
 
@@ -1522,7 +1451,7 @@
       };
     }
 
-    const normalizedText = prependThreadPrefix(plainText, selectedLanguage);
+    const normalizedText = prependThreadPrefix(plainText, interfaceLanguage);
 
     if (numbering && limit - hashtagsBlock.length - " (1/1)".length < 1) {
       throw new Error(uiText("hashtagsNumberingNoRoom"));
@@ -1591,9 +1520,9 @@
     const confirmModalConfirmButton = document.getElementById("confirm-modal-confirm");
     const platformLimit = document.getElementById("platform-limit");
     const customLimit = document.getElementById("custom-limit");
+    const platformPresetButtons = Array.from(form.querySelectorAll("[data-platform-preset]"));
     const preserveLineBreaksInput = document.getElementById("preserve-line-breaks");
-    const languageSelect = document.getElementById("language-select");
-    const compressionStrengthSelect = document.getElementById("compression-strength");
+    const topbarLanguageToggle = document.getElementById("topbar-language-toggle");
     const numberingInput = document.getElementById("include-numbering");
     const supportThreadMkInput = document.getElementById("support-threadmk");
     const pasteButton = document.getElementById("paste-text");
@@ -1601,20 +1530,16 @@
     const newDraftButton = document.getElementById("new-draft");
     const saveDraftButton = document.getElementById("save-draft");
     const loadDraftButton = document.getElementById("load-drafts");
+    const themeToggleButton = document.getElementById("theme-toggle-button");
+    const themeToggleIcon = document.getElementById("theme-toggle-icon");
     const draftsMenu = document.getElementById("drafts-menu");
     const draftsMenuList = document.getElementById("drafts-menu-list");
-    const paletteSelect = document.getElementById("palette-select");
     const largeTextToggle = document.getElementById("large-text-toggle");
     const clearCacheButton = document.getElementById("clear-cache");
     const correctionStatus = document.getElementById("correction-status");
     const correctionStatusActions = document.getElementById("correction-status-actions");
     const inlineSpellcheckButton = document.getElementById("inline-spellcheck");
-    const inlineCompressButton = document.getElementById("inline-compress");
-    const inlineCompressSeparator = document.getElementById("inline-compress-separator");
-    const inlineTranslateButton = document.getElementById("inline-translate");
-    const inlineTranslateSeparator = document.getElementById("inline-translate-separator");
     const correctButton = inlineSpellcheckButton;
-    const compressButton = inlineCompressButton;
     const correctionStatusLabel = document.getElementById("correction-status-label");
     const sourceCharCount = document.getElementById("source-char-count");
     const hashtagsInput = document.getElementById("hashtags");
@@ -1639,17 +1564,13 @@
     const pageHeading = document.getElementById("page-heading");
     const pageDescription = document.getElementById("page-description");
     const dismissIntroButton = document.getElementById("dismiss-intro");
-    const platformLimitLabel = form.querySelector('label[for="platform-limit"]');
+    const platformLimitLabel = document.getElementById("platform-limit-label");
     const preserveLineBreaksTitle = form.querySelector('label[for="preserve-line-breaks"] .toggle-title');
     const preserveLineBreaksTooltip = document.getElementById("preserve-line-breaks-tooltip");
-    const languageSelectLabel = form.querySelector('label[for="language-select"]');
-    const compressionStrengthLabel = document.getElementById("compression-strength-label");
-    const compressionStrengthTooltip = document.getElementById("compression-strength-tooltip");
     const numberingTitle = form.querySelector('label[for="include-numbering"] .toggle-title');
     const numberingTooltip = document.getElementById("number-posts-tooltip");
     const supportThreadMkTitle = form.querySelector('label[for="support-threadmk"] .toggle-title');
     const supportThreadMkTooltip = document.getElementById("support-threadmk-tooltip");
-    const paletteSelectLabel = form.querySelector('label[for="palette-select"]');
     const largeTextTitle = form.querySelector('label[for="large-text-toggle"] .toggle-title');
     const supportTitleText = form.querySelector(".menu-support-title span");
     const menuSignoff = form.querySelector(".menu-signoff");
@@ -1660,18 +1581,8 @@
     const twitterTitleMeta = document.getElementById("twitter-title");
     const twitterDescriptionMeta = document.getElementById("twitter-description");
     const themeColorMeta = document.getElementById("theme-color-meta");
-    const platformLongFormOption = platformLimit.querySelector('option[value="500"]');
-    const platformCustomOption = platformLimit.querySelector('option[value="custom"]');
-    const languageEnglishOption = languageSelect.querySelector('option[value="en"]');
-    const languageSpanishOption = languageSelect.querySelector('option[value="es"]');
-    const paletteDarkOption = paletteSelect.querySelector('option[value="dark"]');
-    const paletteLightOption = paletteSelect.querySelector('option[value="light"]');
-    const compressionSoftOption = compressionStrengthSelect.querySelector('option[value="soft"]');
-    const compressionMediumOption = compressionStrengthSelect.querySelector('option[value="medium"]');
-    const compressionHeavyOption = compressionStrengthSelect.querySelector('option[value="heavy"]');
     let confirmModalResolver = null;
     let saveDraftFeedbackTimeoutId = null;
-    let compressInFlight = false;
     let supportPromptCounter = 0;
     let supportPromptTimeoutId = null;
 
@@ -1828,10 +1739,7 @@
       document.documentElement.dataset.theme = nextPreset.theme;
 
       syncThemeColorMeta();
-
-      if (paletteSelect) {
-        paletteSelect.value = safePreset;
-      }
+      syncPageThemeToggle();
 
       try {
         window.localStorage.setItem(COLOR_PRESET_STORAGE_KEY, safePreset);
@@ -1869,6 +1777,80 @@
       } catch (error) {
         return;
       }
+    }
+
+    function syncPageThemeToggle() {
+      const activePreset = document.documentElement.dataset.theme === "light" ? "light" : "dark";
+      const nextPreset = activePreset === "dark" ? "light" : "dark";
+
+      if (themeToggleIcon) {
+        themeToggleIcon.src =
+          nextPreset === "light"
+            ? "./assets/icons/sun_line.svg"
+            : "./assets/icons/moon_fill.svg";
+      }
+
+      if (themeToggleButton) {
+        themeToggleButton.setAttribute(
+          "aria-label",
+          nextPreset === "light" ? uiText("paletteLight") : uiText("paletteDark"),
+        );
+        themeToggleButton.setAttribute(
+          "title",
+          nextPreset === "light" ? uiText("paletteLight") : uiText("paletteDark"),
+        );
+        themeToggleButton.dataset.nextTheme = nextPreset;
+      }
+    }
+
+    function getPlatformPresetLabel(preset) {
+      if (preset === "bluesky") {
+        return uiText("platformBluesky");
+      }
+
+      if (preset === "mastodon") {
+        return uiText("platformMastodon");
+      }
+
+      return uiText("platformX");
+    }
+
+    function syncPlatformPresetButtons() {
+      const activePreset = platformLimit.value;
+
+      platformPresetButtons.forEach((button) => {
+        const preset = button.dataset.platformPreset;
+        const config = PLATFORM_PRESETS[preset];
+        const isActive = Boolean(config) && preset === activePreset;
+        const icon = button.querySelector(".platform-preset-icon");
+        button.classList.toggle("is-active", isActive);
+        button.setAttribute("aria-pressed", isActive ? "true" : "false");
+        button.setAttribute("aria-label", getPlatformPresetLabel(preset));
+        button.setAttribute("title", getPlatformPresetLabel(preset));
+
+        if (icon && config) {
+          icon.src = isActive ? config.iconFill : config.iconLine;
+        }
+      });
+    }
+
+    function syncPlatformPresetFromLimit() {
+      const nextLimit = Number(customLimit.value);
+      const matchingPreset = Object.entries(PLATFORM_PRESETS).find(([, config]) => config.limit === nextLimit);
+      platformLimit.value = matchingPreset ? matchingPreset[0] : "custom";
+      syncPlatformPresetButtons();
+    }
+
+    function applyPlatformPreset(preset) {
+      const config = PLATFORM_PRESETS[preset];
+      if (!config) {
+        syncPlatformPresetFromLimit();
+        return;
+      }
+
+      platformLimit.value = preset;
+      customLimit.value = String(config.limit);
+      syncPlatformPresetButtons();
     }
 
     function clearSupportPromptTimeout() {
@@ -1924,6 +1906,33 @@
       textNode.textContent = `${uiText("signoff")} `;
     }
 
+    function getTopbarLanguageTarget() {
+      return interfaceLanguage === "es" ? "en" : "es";
+    }
+
+    function updateTopbarLanguageToggle() {
+      if (!topbarLanguageToggle) {
+        return;
+      }
+
+      const targetLanguage = getTopbarLanguageTarget();
+      topbarLanguageToggle.textContent = targetLanguage === "es" ? "ESP" : "ENG";
+      topbarLanguageToggle.setAttribute(
+        "aria-label",
+        `${uiText("language")}: ${getLanguageLabel(targetLanguage, {
+          locale: interfaceLanguage,
+          capitalize: true,
+        })}`,
+      );
+      topbarLanguageToggle.setAttribute(
+        "title",
+        getLanguageLabel(targetLanguage, {
+          locale: interfaceLanguage,
+          capitalize: true,
+        }),
+      );
+    }
+
     function applyIntroVisibility(isDismissed, options = {}) {
       if (!pageIntro) {
         return;
@@ -1951,11 +1960,6 @@
       if (preserveLineBreaksTooltip) {
         preserveLineBreaksTooltip.textContent = uiText("preserveLineBreaksTooltip");
       }
-      languageSelectLabel.textContent = uiText("language");
-      compressionStrengthLabel.textContent = uiText("compressionStrength");
-      if (compressionStrengthTooltip) {
-        compressionStrengthTooltip.textContent = uiText("compressionStrengthTooltip");
-      }
       numberingTitle.textContent = uiText("numberPosts");
       if (numberingTooltip) {
         numberingTooltip.textContent = uiText("numberPostsTooltip");
@@ -1964,10 +1968,8 @@
       if (supportThreadMkTooltip) {
         supportThreadMkTooltip.textContent = uiText("supportThreadMkTooltip");
       }
-      paletteSelectLabel.textContent = uiText("theme");
       largeTextTitle.textContent = uiText("largerText");
       inlineSpellcheckButton.textContent = uiText("spellcheck");
-      inlineCompressButton.textContent = uiText("compress");
       clearCacheButton.textContent = uiText("clearCache");
       if (supportPromptTitle) {
         supportPromptTitle.textContent = uiText("supportPromptTitle");
@@ -2034,21 +2036,13 @@
       if (twitterDescriptionMeta) {
         twitterDescriptionMeta.setAttribute("content", uiText("metaDescription"));
       }
-
-      platformLongFormOption.textContent = `${uiText("longForm")} · 500`;
-      platformCustomOption.textContent = interfaceLanguage === "es" ? "Personalizado" : "Custom";
-      languageEnglishOption.textContent = getLanguageLabel("en", { capitalize: true });
-      languageSpanishOption.textContent = getLanguageLabel("es", { capitalize: true });
-      paletteDarkOption.textContent = uiText("paletteDark");
-      paletteLightOption.textContent = uiText("paletteLight");
-      compressionSoftOption.textContent = uiText("compressSoft");
-      compressionMediumOption.textContent = uiText("compressMedium");
-      compressionHeavyOption.textContent = uiText("compressHeavy");
+      syncPageThemeToggle();
+      syncPlatformPresetButtons();
+      updateTopbarLanguageToggle();
 
       updateMenuSignoffText();
       updateSourceCharCount();
       syncBanner();
-      updateTranslateButtonState();
 
       if (!hashtagsMenu.hidden) {
         renderHashtagMenu();
@@ -2089,12 +2083,7 @@
     function applyInterfaceLanguage(language, options = {}) {
       interfaceLanguage = language === "es" ? "es" : "en";
 
-      if (languageSelect) {
-        languageSelect.value = interfaceLanguage;
-      }
-
       document.documentElement.lang = interfaceLanguage;
-      applyLanguageSelection(interfaceLanguage);
       applyUiTranslations();
       syncLanguageStatus();
 
@@ -2128,10 +2117,9 @@
           JSON.stringify({
             sourceText: getSourceText(),
             hashtags: hashtagsInput.value,
-            platformLimit: platformLimit.value,
+            platformPreset: platformLimit.value,
             customLimit: customLimit.value,
             splitMode: getSplitModeValue(),
-            compressionStrength: normalizeCompressionStrength(compressionStrengthSelect.value),
             numbering: numberingInput.checked,
             supportThreadMk: supportThreadMkInput.checked,
             activeSavedDraftId,
@@ -2148,20 +2136,26 @@
         return false;
       }
 
-      if (typeof draft.platformLimit === "string") {
-        platformLimit.value = draft.platformLimit === "custom" ? "custom" : draft.platformLimit;
+      if (typeof draft.platformPreset === "string") {
+        platformLimit.value =
+          Object.prototype.hasOwnProperty.call(PLATFORM_PRESETS, draft.platformPreset)
+            ? draft.platformPreset
+            : "custom";
+      } else if (typeof draft.platformLimit === "string") {
+        platformLimit.value =
+          Object.prototype.hasOwnProperty.call(PLATFORM_PRESETS, draft.platformLimit)
+            ? draft.platformLimit
+            : "custom";
       }
 
       if (typeof draft.customLimit === "string" && draft.customLimit) {
         customLimit.value = draft.customLimit;
       }
 
+      syncPlatformPresetFromLimit();
+
       if (typeof draft.splitMode === "string") {
         preserveLineBreaksInput.checked = draft.splitMode === "paragraph";
-      }
-
-      if (typeof draft.compressionStrength === "string") {
-        compressionStrengthSelect.value = normalizeCompressionStrength(draft.compressionStrength);
       }
 
       numberingInput.checked = Boolean(draft.numbering);
@@ -2546,7 +2540,6 @@
     }
 
     let sourceMarkupActive = false;
-    let translateInFlight = false;
     let transientBannerMessage = "";
     let transientBannerHtml = "";
 
@@ -2555,6 +2548,7 @@
       correctionStatusLabel.textContent = message;
       correctionStatusLabel.hidden = !hasMessage;
       correctionStatus.hidden = !hasMessage;
+      inlineSpellcheckButton.hidden = hasMessage;
     }
 
     function syncBanner() {
@@ -2723,88 +2717,29 @@
       );
     }
 
-    function applyLanguageSelection(language) {
-      selectedLanguage = language === "es" ? "es" : "en";
-      syncLanguageStatus();
-    }
-
-    function getTranslateButtonLabel(language = getOppositeLanguage()) {
-      return uiText("translateToLanguage", {
-        language: getLanguageLabel(language, {
-          locale: interfaceLanguage,
-          capitalize: true,
-        }),
-      });
-    }
-
-    function getTranslatingButtonLabel(language = getOppositeLanguage()) {
-      return uiText("translatingToLanguage", {
-        language: getLanguageLabel(language, {
-          locale: interfaceLanguage,
-          capitalize: true,
-        }),
-      });
-    }
-
-    function getGeneratedPostCount() {
-      return resultsList.querySelectorAll(".post-card").length;
-    }
-
-    function syncInlineActionSeparators() {
-      if (!inlineCompressSeparator || !inlineCompressButton || !inlineTranslateSeparator || !inlineTranslateButton) {
-        return;
+    function applyPastedTextValue(text) {
+      const normalizedText = normalizePlainPaste(text) || normalizePastedText(text);
+      if (!normalizedText) {
+        setBanner(uiText("clipboardEmpty"));
+        return false;
       }
 
-      const showCompress = !inlineCompressButton.hidden;
-      const showTranslate = !inlineTranslateButton.hidden;
-
-      inlineCompressSeparator.hidden = !showCompress && !showTranslate;
-      inlineTranslateSeparator.hidden = !showCompress || !showTranslate;
-    }
-
-    function updateTranslateButtonState() {
-      if (!inlineTranslateButton || !inlineTranslateSeparator) {
-        return;
-      }
-
-      const hasResults = getGeneratedPostCount() > 0;
-      const normalizedSourceText = normalizeText(getSourceText());
-      const hasSourceText = Boolean(normalizedSourceText);
-      const meetsMinimumLength =
-        hasSourceText && normalizedSourceText.length >= MIN_TRANSLATION_SOURCE_CHARACTERS;
-      const isVisible = hasResults && meetsMinimumLength;
-
-      inlineTranslateSeparator.hidden = !isVisible;
-      inlineTranslateButton.hidden = !isVisible;
-      inlineTranslateButton.disabled = translateInFlight;
-
-      if (!translateInFlight) {
-        const targetLanguage = getOppositeLanguage();
-        const buttonLabel = getTranslateButtonLabel(targetLanguage);
-        inlineTranslateButton.textContent = buttonLabel;
-        inlineTranslateButton.setAttribute("aria-label", buttonLabel);
-      }
-
-      syncInlineActionSeparators();
+      flattenSourceMarkupPreservingSelection();
+      insertTextAtCursor(normalizedText);
+      trimLeadingDraftPadding();
+      sourceInput.dispatchEvent(new Event("input", { bubbles: true }));
+      setBanner("");
+      return true;
     }
 
     function updateCorrectButtonState() {
       const normalizedText = normalizeText(getSourceText());
-      const disabled = !normalizedText;
-      const compressionEligible = getGeneratedPostCount() > 1;
-      const compressionDisabled = compressInFlight || disabled || !compressionEligible;
-      correctButton.disabled = disabled || compressInFlight;
-      compressButton.disabled = compressionDisabled;
-      inlineSpellcheckButton.disabled = disabled || compressInFlight;
-      inlineCompressButton.disabled = compressionDisabled;
-      inlineCompressButton.hidden = !compressionEligible;
-      syncInlineActionSeparators();
+      correctButton.disabled = !normalizedText;
+      inlineSpellcheckButton.disabled = !normalizedText;
     }
 
     function getLimitValue() {
-      return platformLimit.value === "custom"
-        ? Number(customLimit.value)
-        : Number(platformLimit.value);
+      return Number(customLimit.value);
     }
 
     function renderEmpty() {
@@ -2859,7 +2794,6 @@
               } else {
                 setSupportPromptCounter(supportPromptCounter + 1);
               }
-              updateTranslateButtonState();
             }
             window.setTimeout(() => {
               copyButton.classList.remove("copied");
@@ -2967,12 +2901,6 @@
 
     function render() {
       try {
-        if (platformLimit.value === "custom") {
-          customLimit.hidden = false;
-        } else {
-          customLimit.hidden = true;
-        }
-
         const rawText = getSourceText();
         const limit = getLimitValue();
         const userHashtags = normalizeHashtags(hashtagsInput.value);
@@ -3005,7 +2933,6 @@
         setBanner(error.message);
       } finally {
         updateCorrectButtonState();
-        updateTranslateButtonState();
         saveDraftState();
       }
     }
@@ -3096,9 +3023,7 @@
       }
 
       correctButton.disabled = true;
-      compressButton.disabled = true;
       inlineSpellcheckButton.disabled = true;
-      inlineCompressButton.disabled = true;
       const button = correctButton;
       const originalLabel = button.textContent;
       button.textContent = uiText("correctingText");
@@ -3132,148 +3057,6 @@
       } finally {
         button.textContent = originalLabel;
         updateCorrectButtonState();
-      }
-    }
-
-    async function handleCompressText() {
-      const rawText = getSourceText();
-      const normalizedSourceText = normalizeText(rawText);
-      if (
-        !normalizedSourceText ||
-        compressInFlight ||
-        getGeneratedPostCount() < 2
-      ) {
-        return;
-      }
-
-      if (normalizedSourceText.length > MAX_COMPRESSION_SOURCE_CHARACTERS) {
-        setBanner(
-          uiText("compressionLimitReached", {
-            count: MAX_COMPRESSION_SOURCE_CHARACTERS,
-          }),
-        );
-        return;
-      }
-
-      moreMenu.open = false;
-      compressInFlight = true;
-      correctButton.disabled = true;
-      compressButton.disabled = true;
-      inlineSpellcheckButton.disabled = true;
-      inlineCompressButton.disabled = true;
-      const originalLabel = compressButton.textContent;
-      compressButton.textContent = uiText("compressing");
-      setCorrectionStatus(uiText("compressing"));
-
-      try {
-        const result = await compressTextContent(normalizedSourceText, {
-          sourceLanguage: interfaceLanguage === "es" ? "es" : "en",
-          compressionStrength: compressionStrengthSelect.value,
-        });
-
-        setSourceText(result.compressedText);
-        render();
-        focusSourceInput();
-
-        if (result.compressedText === normalizedSourceText) {
-          setCorrectionStatus(uiText("compressionNoChanges"));
-        } else {
-          setCorrectionStatus(
-            uiText("compressedBy", {
-              count: Math.max(0, normalizedSourceText.length - result.compressedText.length),
-            }),
-          );
-        }
-      } catch (error) {
-        setCorrectionStatus(
-          typeof error?.message === "string" && error.message.trim()
-            ? error.message
-            : uiText("compressionFailed"),
-        );
-      } finally {
-        compressInFlight = false;
-        compressButton.textContent = originalLabel;
-        updateCorrectButtonState();
-      }
-    }
-
-    async function handleTranslateThread() {
-      if (!inlineTranslateButton) {
-        return;
-      }
-
-      const rawText = getSourceText();
-      const normalizedSourceText = normalizeText(rawText);
-      if (
-        !normalizedSourceText ||
-        translateInFlight ||
-        normalizedSourceText.length < MIN_TRANSLATION_SOURCE_CHARACTERS
-      ) {
-        return;
-      }
-
-      if (normalizedSourceText.length > MAX_TRANSLATION_SOURCE_CHARACTERS) {
-        setBanner(
-          uiText("translationLimitReached", {
-            count: MAX_TRANSLATION_SOURCE_CHARACTERS,
-          }),
-        );
-        return;
-      }
-
-      const sourceLanguage = interfaceLanguage === "es" ? "es" : "en";
-      const targetLanguage = getOppositeLanguage(sourceLanguage);
-      const originalLabel = getTranslateButtonLabel(targetLanguage);
-      const loadingLabel = getTranslatingButtonLabel(targetLanguage);
-
-      translateInFlight = true;
-      inlineTranslateButton.disabled = true;
-      inlineTranslateButton.textContent = loadingLabel;
-      inlineTranslateButton.setAttribute("aria-label", loadingLabel);
-      setBanner("");
-
-      try {
-        const response = await fetch("/api/translate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            sourceText: normalizedSourceText,
-            hashtags: normalizeHashtags(hashtagsInput.value || ""),
-            sourceLanguage,
-            targetLanguage,
-          }),
-        });
-
-        const payload = await response.json().catch(() => null);
-        if (!response.ok) {
-          throw new Error(payload?.error || uiText("translationFailed"));
-        }
-
-        activeSavedDraftId = null;
-        setSourceText(typeof payload?.translatedText === "string" ? payload.translatedText : "");
-        hashtagsInput.value = normalizeHashtags(
-          typeof payload?.translatedHashtags === "string" ? payload.translatedHashtags : "",
-        );
-        applyInterfaceLanguage(payload?.targetLanguage === "es" ? "es" : "en", {
-          persist: true,
-        });
-        closeDraftsMenu();
-        closeHashtagsMenu();
-        render();
-        focusSourceInput();
-      } catch (error) {
-        setBanner(
-          typeof error?.message === "string" && error.message.trim()
-            ? error.message
-            : uiText("translationFailed"),
-        );
-      } finally {
-        translateInFlight = false;
-        inlineTranslateButton.textContent = originalLabel;
-        inlineTranslateButton.setAttribute("aria-label", originalLabel);
-        updateTranslateButtonState();
       }
     }
 
@@ -3371,16 +3154,10 @@
         }
 
         const pastedText = await navigator.clipboard.readText();
-        if (!pastedText) {
-          setBanner(uiText("clipboardEmpty"));
+        if (!applyPastedTextValue(pastedText)) {
           return;
         }
 
-        flattenSourceMarkupPreservingSelection();
-        insertTextAtCursor(normalizePlainPaste(pastedText) || normalizePastedText(pastedText));
-        trimLeadingDraftPadding();
-        sourceInput.dispatchEvent(new Event("input", { bubbles: true }));
-        setBanner("");
         pasteButton.classList.add("pasted");
         pasteButtonLabel.textContent = uiText("paste");
         pasteButton.setAttribute("aria-label", uiText("pasted"));
@@ -3619,10 +3396,10 @@
 
       if (target.classList.contains("change")) {
         toggleAllMatches(original, "reverted");
-        addIgnoredCorrection(original, selectedLanguage);
+        addIgnoredCorrection(original, interfaceLanguage);
       } else {
         toggleAllMatches(original, "change");
-        removeIgnoredCorrection(original, selectedLanguage);
+        removeIgnoredCorrection(original, interfaceLanguage);
       }
 
       render();
@@ -3633,16 +3410,18 @@
     sourceInput.addEventListener("click", handleSourceClick);
     sourceInput.addEventListener("paste", handleSourcePaste);
     inlineSpellcheckButton.addEventListener("click", handleCorrection);
-    inlineCompressButton.addEventListener("click", handleCompressText);
-    inlineTranslateButton.addEventListener("click", handleTranslateThread);
     hashtagsInput.addEventListener("input", handleHashtagsInput);
-    platformLimit.addEventListener("change", render);
-    customLimit.addEventListener("input", render);
+    platformPresetButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        applyPlatformPreset(button.dataset.platformPreset || "");
+        render();
+      });
+    });
+    customLimit.addEventListener("input", syncPlatformPresetFromLimit);
     preserveLineBreaksInput.addEventListener("change", render);
-    languageSelect.addEventListener("change", () => {
-      applyInterfaceLanguage(languageSelect.value, { persist: true });
+    topbarLanguageToggle?.addEventListener("click", () => {
+      applyInterfaceLanguage(getTopbarLanguageTarget(), { persist: true });
       render();
-      moreMenu.open = false;
     });
     pasteButton.addEventListener("click", handlePasteFromClipboard);
     dismissIntroButton.addEventListener("click", () => {
@@ -3681,9 +3460,8 @@
       });
     }
     clearCacheButton.addEventListener("click", handleClearCache);
-    paletteSelect.addEventListener("change", () => {
-      applyColorPreset(paletteSelect.value);
-      moreMenu.open = false;
+    themeToggleButton?.addEventListener("click", () => {
+      applyColorPreset(themeToggleButton.dataset.nextTheme === "light" ? "light" : "dark");
     });
     largeTextToggle.addEventListener("change", () => {
       applyTextSize(largeTextToggle.checked ? "large" : "normal");
@@ -3740,6 +3518,7 @@
     applyTextSize(loadTextSizePreference());
     applyIntroVisibility(loadIntroDismissedPreference());
     applyInterfaceLanguage(loadInterfaceLanguagePreference() || initialBrowserLanguage || "en");
+    syncPlatformPresetFromLimit();
     syncMoreMenuState();
     restoreDraftState();
     supportPromptCounter = loadSupportPromptCounter();
@@ -3752,7 +3531,6 @@
   if (typeof window !== "undefined") {
     window.ThreadMK = {
       buildThread,
-      compressTextContent,
       correctTextContent,
       detectSuggestedLanguage,
       normalizeHashtags,
@@ -3768,7 +3546,6 @@
     module.exports = {
       applySimpleCorrections,
       buildThread,
-      compressTextContent,
       correctTextContent,
       detectSuggestedLanguage,
       normalizeHashtags,

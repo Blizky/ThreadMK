@@ -86,32 +86,92 @@
           />
           <span>ThreadMK</span>
         </div>
-        <details class="more-menu" id="more-menu">
-          <summary class="more-trigger">
-            <img
-              class="icon-img"
-              src="./assets/icons/settings_3_fill.svg"
-              alt=""
-              width="28"
-              height="28"
-              aria-hidden="true"
-            />
-          </summary>
-          <form class="menu-panel" id="thread-form">
-            <div class="field-group menu-inline-field">
-              <label for="language-select">Language</label>
-              <select id="language-select" name="language-select" class="menu-compact-control">
-                <option value="en">English</option>
-                <option value="es">Spanish</option>
-              </select>
-            </div>
-
-            <div class="field-group menu-inline-field">
-              <label for="palette-select">Theme</label>
-              <select id="palette-select" name="palette-select" class="menu-compact-control">
-                <option value="dark">Dark</option>
-                <option value="light">Light</option>
-              </select>
+        <div class="topbar-actions">
+          <button id="topbar-language-toggle" class="topbar-language-toggle" type="button">ESP</button>
+          <details class="more-menu" id="more-menu">
+            <summary class="more-trigger">
+              <img
+                class="icon-img"
+                src="./assets/icons/settings_3_fill.svg"
+                alt=""
+                width="28"
+                height="28"
+                aria-hidden="true"
+              />
+            </summary>
+            <form class="menu-panel" id="thread-form">
+            <div class="field-group">
+              <label for="custom-limit" id="platform-limit-label">Characters per post</label>
+              <div class="platform-limit-row" id="platform-limit-row" role="group" aria-labelledby="platform-limit-label">
+                <div class="platform-preset-buttons" id="platform-preset-buttons">
+                  <button
+                    id="platform-preset-x"
+                    class="platform-preset-button"
+                    type="button"
+                    data-platform-preset="x"
+                    aria-pressed="true"
+                    aria-label="X"
+                    title="X"
+                  >
+                    <img
+                      class="icon-img platform-preset-icon"
+                      src="./assets/icons/social_x_fill.svg"
+                      alt=""
+                      width="20"
+                      height="20"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    id="platform-preset-bluesky"
+                    class="platform-preset-button"
+                    type="button"
+                    data-platform-preset="bluesky"
+                    aria-pressed="false"
+                    aria-label="Bluesky"
+                    title="Bluesky"
+                  >
+                    <img
+                      class="icon-img platform-preset-icon"
+                      src="./assets/icons/bluesky_social_line.svg"
+                      alt=""
+                      width="20"
+                      height="20"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    id="platform-preset-mastodon"
+                    class="platform-preset-button"
+                    type="button"
+                    data-platform-preset="mastodon"
+                    aria-pressed="false"
+                    aria-label="Mastodon"
+                    title="Mastodon"
+                  >
+                    <img
+                      class="icon-img platform-preset-icon"
+                      src="./assets/icons/mastodon_line.svg"
+                      alt=""
+                      width="20"
+                      height="20"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
+                <input id="platform-limit" name="platform-limit" type="hidden" value="x" />
+                <input
+                  id="custom-limit"
+                  name="custom-limit"
+                  type="number"
+                  min="50"
+                  max="1000"
+                  step="1"
+                  value="280"
+                  class="menu-compact-control platform-limit-input"
+                  aria-label="Custom character limit"
+                />
+              </div>
             </div>
 
             <label class="toggle-row" for="large-text-toggle">
@@ -123,30 +183,6 @@
                 <span class="toggle-icon" aria-hidden="true"></span>
               </span>
             </label>
-
-            <div class="menu-divider" aria-hidden="true"></div>
-
-            <div class="field-group">
-              <label for="platform-limit">Characters per post</label>
-              <select id="platform-limit" name="platform-limit" class="menu-compact-control">
-                <option value="280">X / Twitter · 280</option>
-                <option value="300">Bluesky · 300</option>
-                <option value="500">Long-form · 500</option>
-                <option value="custom">Custom</option>
-              </select>
-              <input
-                id="custom-limit"
-                name="custom-limit"
-                type="number"
-                min="50"
-                max="1000"
-                step="1"
-                value="280"
-                class="menu-compact-control"
-                aria-label="Custom character limit"
-                hidden
-              />
-            </div>
 
             <label class="toggle-row menu-setting-tooltip-row" for="preserve-line-breaks">
               <div class="menu-setting-tooltip-wrap">
@@ -180,18 +216,6 @@
                 <span class="toggle-icon" aria-hidden="true"></span>
               </span>
             </label>
-
-            <div class="field-group menu-inline-field menu-setting-tooltip-field">
-              <label for="compression-strength" class="menu-setting-tooltip-wrap">
-                <span id="compression-strength-label">Compression</span>
-                <span id="compression-strength-tooltip" class="post-hashtag-tooltip menu-setting-tooltip" role="tooltip">AI function that shortens your text while keeping the main idea. Soft makes light changes, Medium rewrites a bit more, and Heavy edits more aggressively.</span>
-              </label>
-              <select id="compression-strength" name="compression-strength" class="menu-compact-control">
-                <option value="soft">Soft</option>
-                <option value="medium" selected>Medium</option>
-                <option value="heavy">Heavy</option>
-              </select>
-            </div>
 
             <div class="menu-actions">
               <button id="clear-cache" class="menu-text-action" type="button">
@@ -258,8 +282,9 @@
                 aria-hidden="true"
               />
             </p>
-          </form>
-        </details>
+            </form>
+          </details>
+        </div>
       </div>
     </header>
 
@@ -289,7 +314,7 @@
         aria-describedby="support-prompt-message"
       >
         <h2 class="confirm-modal-title support-prompt-title" id="support-prompt-title">Give if you're able</h2>
-        <p class="support-prompt-message" id="support-prompt-message">Help keep ThreadMK free and awesome. Your support helps cover AI and hosting costs. If it saves you time, consider backing it.</p>
+        <p class="support-prompt-message" id="support-prompt-message">Help keep ThreadMK free and awesome. Your support helps cover hosting and development costs. If it saves you time, consider backing it.</p>
         <div class="support-prompt-links menu-support">
           <a
             id="support-prompt-kofi"
@@ -400,16 +425,12 @@
               data-placeholder="Enter text here..."
             ></div>
           </div>
-          <div class="composer-notice" id="correction-status" hidden>
-            <span class="composer-notice-label" id="correction-status-label" hidden></span>
-          </div>
           <div class="panel-header">
             <div class="editor-status-actions" id="correction-status-actions">
               <button class="editor-status-action" id="inline-spellcheck" type="button">Spellcheck</button>
-              <span class="editor-status-separator" id="inline-compress-separator" aria-hidden="true" hidden>|</span>
-              <button class="editor-status-action" id="inline-compress" type="button" hidden>Compress</button>
-              <span class="editor-status-separator" id="inline-translate-separator" aria-hidden="true" hidden>|</span>
-              <button class="editor-status-action" id="inline-translate" type="button" hidden>Translate to Spanish</button>
+              <div class="composer-notice" id="correction-status" hidden aria-live="polite">
+                <span class="composer-notice-label" id="correction-status-label" hidden></span>
+              </div>
             </div>
             <div class="panel-actions">
               <p class="source-char-count" id="source-char-count">0 chars</p>
@@ -465,6 +486,19 @@
           <div class="empty-state"></div>
         </div>
       </section>
+      <div class="page-theme-toggle-wrap">
+        <button id="theme-toggle-button" class="page-theme-button" type="button">
+          <img
+            id="theme-toggle-icon"
+            class="icon-img page-theme-icon"
+            src="./assets/icons/sun_line.svg"
+            alt=""
+            width="20"
+            height="20"
+            aria-hidden="true"
+          />
+        </button>
+      </div>
     </main>
 
     <template id="post-template">

@@ -76,6 +76,46 @@ a {
   transform: translateY(0);
 }
 
+.topbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.topbar-language-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  height: auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.topbar-language-toggle:hover,
+.topbar-language-toggle:focus-visible {
+  color: var(--brand-accent);
+}
+
+.topbar-language-toggle:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.topbar-language-toggle:active {
+  outline: none;
+  box-shadow: none;
+}
+
 .more-menu {
   position: relative;
   z-index: 80;
@@ -281,6 +321,41 @@ a {
   padding: 12px 16px 40px;
 }
 
+.page-theme-toggle-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4px);
+}
+
+.page-theme-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0 0 0 0;
+  margin-top: -2px;
+  border: none;
+  background: transparent;
+  color: var(--panel-bar-text);
+  cursor: pointer;
+}
+
+.page-theme-button:hover,
+.page-theme-button:focus-visible {
+  color: var(--brand-accent);
+}
+
+.page-theme-button:focus {
+  outline: none;
+}
+
+.page-theme-icon {
+  width: 24px;
+  height: 24px;
+}
+
 .page-intro {
   position: relative;
   display: grid;
@@ -406,8 +481,7 @@ a {
 .composer-notice {
   display: flex;
   align-items: center;
-  min-height: 22px;
-  padding: 0 15px 10px;
+  min-width: 0;
   background: transparent;
   color: var(--panel-bar-text);
 }
@@ -418,6 +492,9 @@ a {
   font-size: 0.85rem;
   font-weight: 600;
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .post-card {
@@ -457,15 +534,21 @@ a {
 
 .drafts-actions {
   position: relative;
-  flex: 0 0 110px;
-  min-width: 110px;
+  flex: 0 0 auto;
+  min-width: 0;
 }
 
-.drafts-action-button {
-  flex: 0 0 110px;
-  width: 110px;
-  min-width: 110px;
-  max-width: 110px;
+.drafts-toolbar .drafts-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  padding: 0 20px;
+  white-space: nowrap;
+  text-align: center;
 }
 
 .textarea-shell {
@@ -561,6 +644,61 @@ h2 {
   min-width: 132px;
 }
 
+.platform-limit-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.platform-preset-buttons {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.platform-preset-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--line);
+  background: var(--control-bg);
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    transform 120ms ease;
+}
+
+.platform-preset-button:hover,
+.platform-preset-button:focus-visible {
+  border-color: var(--line-strong);
+}
+
+.platform-preset-button.is-active {
+  background: linear-gradient(180deg, var(--button-top), var(--button-bottom));
+  border-color: var(--button-border-color);
+}
+
+.platform-preset-button:focus {
+  outline: none;
+}
+
+.platform-preset-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.platform-limit-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+}
+
 .hashtags-toolbar {
   display: flex;
   align-items: stretch;
@@ -569,8 +707,8 @@ h2 {
 }
 
 .hashtags-input-wrap {
-  flex: 0 1 50%;
-  max-width: 50%;
+  flex: 1 1 auto;
+  max-width: none;
   min-width: 0;
 }
 
@@ -578,21 +716,22 @@ h2 {
   display: flex;
   align-items: stretch;
   gap: 8px;
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-width: 0;
   position: relative;
 }
 
 .hashtags-actions > .hashtags-action-button {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-width: 0;
 }
 
-.hashtags-action-button {
-  width: 100%;
+.hashtags-toolbar .hashtags-action-button {
+  width: auto;
   min-height: 48px;
   min-width: 0;
-  padding: 0 10px;
+  padding: 0 20px;
+  white-space: nowrap;
   appearance: none;
   -moz-appearance: none;
   transition:
@@ -1063,7 +1202,8 @@ select:focus {
 .editor-status-actions {
   display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex: 1 1 auto;
+  min-width: 0;
   gap: 8px;
 }
 
@@ -1302,15 +1442,15 @@ select:focus {
   }
 
   .drafts-toolbar .drafts-actions {
-    flex: 0 0 110px;
-    min-width: 110px;
-    max-width: 110px;
+    flex: 0 0 auto;
+    min-width: 0;
+    max-width: none;
   }
 
   .drafts-toolbar .drafts-action-button {
-    width: 110px;
-    min-width: 110px;
-    max-width: 110px;
+    width: auto;
+    min-width: 0;
+    max-width: none;
   }
 
   textarea {
@@ -1319,6 +1459,10 @@ select:focus {
 }
 
 @media (max-width: 719px) {
+  .paste-button {
+    display: none;
+  }
+
   .menu-panel {
     position: fixed;
     top: 58px;
